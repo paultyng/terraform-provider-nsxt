@@ -324,6 +324,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_vtep_ha_host_switch_profile":                dataSourceNsxtVtepHAHostSwitchProfile(),
 			"nsxt_policy_distributed_flood_protection_profile":       dataSourceNsxtPolicyDistributedFloodProtectionProfile(),
 			"nsxt_policy_gateway_flood_protection_profile":           dataSourceNsxtPolicyGatewayFloodProtectionProfile(),
+			"nsxt_policy_ods_pre_defined_runbook":                    dataSourceNsxtPolicyODSPreDefinedRunbook(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -492,6 +493,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_gateway_flood_protection_profile_binding":     resourceNsxtPolicyGatewayFloodProtectionProfileBinding(),
 			"nsxt_policy_compute_sub_cluster":                          resourceNsxtPolicyComputeSubCluster(),
 			"nsxt_policy_tier0_inter_vrf_routing":                      resourceNsxtPolicyTier0InterVRFRouting(),
+			"nsxt_policy_ods_runbook_invocation":                       resourceNsxtPolicyODSRunbookInvocation(),
 		},
 
 		ConfigureFunc: providerConfigure,
