@@ -1,3 +1,19 @@
+## 3.6.1 (May 2, 2024)
+
+BUG FIXES:
+* `resource/nsxt_policy_security_policy`: Fix crash when reading policy that does not exist on backend ([#1202](https://github.com/vmware/terraform-provider-nsxt/pull/1202))
+* `resource/nsxt_policy_lb_virtual_server`: Fix SNI path assignment ([#1197](https://github.com/vmware/terraform-provider-nsxt/pull/1197))
+* `data/nsxt_policy_vm`, `data/nsxt_policy_vms`, `resource/nsxt_policy_vm_tags`: Fix failure to find certain VMs due to inconsistent pagination ([#1194](https://github.com/vmware/terraform-provider-nsxt/pull/1194))
+* `data/nsxt_policy_vm`, `data/nsxt_policy_vms`, `resource/nsxt_policy_vm_tags`: Allow non-admin user to pull VMs and modify VM tags, by using a new API available with NSX 4.1.1 onwards ([#1187](https://github.com/vmware/terraform-provider-nsxt/pull/1187))
+
+IMPROVEMENTS:
+* `data/nsxt_policy_vm`, `data/nsxt_policy_vms`, `resource/nsxt_policy_vm_tags`: Improve performance by using search API for NSX 4.1.2 and above ([#1196](https://github.com/vmware/terraform-provider-nsxt/pull/1196))
+* `resource/nsxt_policy_ip_block`: Add `visibility` attribute for NSX 4.2.0 onwards ([#1195](https://github.com/vmware/terraform-provider-nsxt/pull/1195))
+* `resource/nsxt_policy_vm_tags`: Add support for fixed segments in VM interface tagging ([#1187](https://github.com/vmware/terraform-provider-nsxt/pull/1187))
+
+BUG FIXES ON EXPERIMENTAL FEATURES:
+* `resource/nsxt_edge_transport_node`: fix crash when syslog port is specified ([#1190](https://github.com/vmware/terraform-provider-nsxt/pull/1190))
+
 ## 3.6.0 (April 16, 2024)
 
 IMPROVEMENTS:

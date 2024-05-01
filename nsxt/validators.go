@@ -31,10 +31,7 @@ func isSinglePort(vi interface{}) bool {
 	default:
 		return false
 	}
-	if i > 65536 {
-		return false
-	}
-	return true
+	return i <= 65536
 }
 
 func isPortRange(v string) bool {
