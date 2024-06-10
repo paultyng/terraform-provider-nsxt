@@ -61,7 +61,7 @@ func resourceNsxtPolicyContextProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"app_id":       getContextProfilePolicyAppIDAttributesSchema(),
 			"custom_url":   getContextProfilePolicyCustomURLAttributesSchema(),
 			"domain_name":  getContextProfilePolicyOtherAttributesSchema(),
@@ -187,7 +187,10 @@ func resourceNsxtPolicyContextProfileExists(sessionContext utl.SessionContext, i
 
 func resourceNsxtPolicyContextProfileCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	context := getSessionContext(d, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 	// Initialize resource Id and verify this ID is not yet used
 	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyContextProfileExists)
 	if err != nil {
@@ -245,7 +248,11 @@ func resourceNsxtPolicyContextProfileRead(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("Error obtaining ContextProfile ID")
 	}
 
-	client := infra.NewContextProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewContextProfilesClient(context, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "ContextProfile", id, err)
@@ -264,7 +271,10 @@ func resourceNsxtPolicyContextProfileRead(d *schema.ResourceData, m interface{})
 
 func resourceNsxtPolicyContextProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	context := getSessionContext(d, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining ContextProfile ID")
@@ -274,7 +284,6 @@ func resourceNsxtPolicyContextProfileUpdate(d *schema.ResourceData, m interface{
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	attributesStructList := make([]model.PolicyAttributes, 0)
-	var err error
 	for key := range attributeKeyMap {
 		attributes := d.Get(key).(*schema.Set).List()
 		err := checkAttributesValid(context, attributes, m, key)
@@ -316,7 +325,11 @@ func resourceNsxtPolicyContextProfileDelete(d *schema.ResourceData, m interface{
 	connector := getPolicyConnector(m)
 	var err error
 	force := true
-	client := infra.NewContextProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewContextProfilesClient(context, connector)
 	err = client.Delete(id, &force, nil)
 	if err != nil {
 		return handleDeleteError("ContextProfile", id, err)

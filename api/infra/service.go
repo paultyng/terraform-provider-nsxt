@@ -34,7 +34,7 @@ func NewServicesClient(sessionContext utl.SessionContext, connector vapiProtocol
 	default:
 		return nil
 	}
-	return &ServiceClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &ServiceClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c ServiceClientContext) Get(serviceIdParam string) (model0.Service, error) {

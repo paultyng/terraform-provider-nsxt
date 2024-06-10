@@ -16,7 +16,7 @@ func dataSourceNsxtPolicyGatewayFloodProtectionProfile() *schema.Resource {
 			"display_name": getDataSourceExtendedDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 		},
 	}
 }
@@ -24,7 +24,11 @@ func dataSourceNsxtPolicyGatewayFloodProtectionProfile() *schema.Resource {
 func dataSourceNsxtPolicyGatewayFloodProtectionProfileRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "GatewayFloodProtectionProfile", nil)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	_, err = policyDataSourceResourceRead(d, connector, context, "GatewayFloodProtectionProfile", nil)
 	if err != nil {
 		return err
 	}

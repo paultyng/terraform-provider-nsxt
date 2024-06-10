@@ -30,7 +30,7 @@ var macDiscoveryProfileSchema = map[string]*metadata.ExtendedSchema{
 	"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
 	"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
 	"tag":          metadata.GetExtendedSchema(getTagsSchema()),
-	"context":      metadata.GetExtendedSchema(getContextSchema(false, false)),
+	"context":      metadata.GetExtendedSchema(getContextSchema(false, false, false)),
 	"mac_change_enabled": {
 		Schema: schema.Schema{
 			Type:     schema.TypeBool,
@@ -181,7 +181,11 @@ func resourceNsxtPolicyMacDiscoveryProfileCreate(d *schema.ResourceData, m inter
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating MacDiscoveryProfile with ID %s", id)
 	boolFalse := false
-	client := infra.NewMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewMacDiscoveryProfilesClient(context, connector)
 	err = client.Patch(id, obj, &boolFalse)
 	if err != nil {
 		return handleCreateError("MacDiscoveryProfile", id, err)
@@ -201,7 +205,11 @@ func resourceNsxtPolicyMacDiscoveryProfileRead(d *schema.ResourceData, m interfa
 		return fmt.Errorf("Error obtaining MacDiscoveryProfile ID")
 	}
 
-	client := infra.NewMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewMacDiscoveryProfilesClient(context, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "MacDiscoveryProfile", id, err)
@@ -247,8 +255,12 @@ func resourceNsxtPolicyMacDiscoveryProfileUpdate(d *schema.ResourceData, m inter
 
 	// Update the resource using PATCH
 	boolFalse := false
-	client := infra.NewMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
-	_, err := client.Update(id, obj, &boolFalse)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewMacDiscoveryProfilesClient(context, connector)
+	_, err = client.Update(id, obj, &boolFalse)
 	if err != nil {
 		return handleUpdateError("MacDiscoveryProfile", id, err)
 	}
@@ -264,8 +276,12 @@ func resourceNsxtPolicyMacDiscoveryProfileDelete(d *schema.ResourceData, m inter
 
 	connector := getPolicyConnector(m)
 	boolFalse := false
-	client := infra.NewMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
-	err := client.Delete(id, &boolFalse)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewMacDiscoveryProfilesClient(context, connector)
+	err = client.Delete(id, &boolFalse)
 
 	if err != nil {
 		return handleDeleteError("MacDiscoveryProfile", id, err)

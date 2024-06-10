@@ -24,6 +24,13 @@ func TestAccDataSourceNsxtPolicySecurityPolicy_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicySecurityPolicy_multitenancyProvider(t *testing.T) {
+	testAccDataSourceNsxtPolicySecurityPolicyBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccDataSourceNsxtPolicySecurityPolicyBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	category := "Application"

@@ -49,6 +49,13 @@ func TestAccDataSourceNsxtPolicyIntrusionServiceProfile_multitenancy(t *testing.
 	})
 }
 
+func TestAccDataSourceNsxtPolicyIntrusionServiceProfile_multitenancyProvider(t *testing.T) {
+	testAccDataSourceNsxtPolicyIntrusionServiceProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccDataSourceNsxtPolicyIntrusionServiceProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	testResourceName := "data.nsxt_policy_intrusion_service_profile.test"

@@ -33,7 +33,7 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBinding() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"profile_path": {
 				Type:         schema.TypeString,
 				Description:  "The path of the flood protection profile",
@@ -95,12 +95,17 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingPatch(d *schema.Resou
 	if err != nil {
 		return err
 	}
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+
 	if tier0ID != "" {
 		if localeServiceID == "" {
-			bindingClient := tier0s.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
+			bindingClient := tier0s.NewFloodProtectionProfileBindingsClient(context, connector)
 			err = bindingClient.Patch(tier0ID, id, obj)
 		} else {
-			bindingClient := t0localeservices.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
+			bindingClient := t0localeservices.NewFloodProtectionProfileBindingsClient(context, connector)
 			err = bindingClient.Patch(tier0ID, localeServiceID, id, obj)
 		}
 		if err != nil {
@@ -108,10 +113,10 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingPatch(d *schema.Resou
 		}
 	} else if tier1ID != "" {
 		if localeServiceID == "" {
-			bindingClient := tier1s.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
+			bindingClient := tier1s.NewFloodProtectionProfileBindingsClient(context, connector)
 			err = bindingClient.Patch(tier1ID, id, obj)
 		} else {
-			bindingClient := t1localeservices.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
+			bindingClient := t1localeservices.NewFloodProtectionProfileBindingsClient(context, connector)
 			err = bindingClient.Patch(tier1ID, localeServiceID, id, obj)
 		}
 	}
@@ -166,7 +171,11 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingCreate(d *schema.Reso
 	id := "default"
 	parentPath := d.Get("parent_path").(string)
 
-	exist, err := resourceNsxtPolicyGatewayFloodProtectionProfileBindingExists(getSessionContext(d, m), getPolicyConnector(m), parentPath, id)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	exist, err := resourceNsxtPolicyGatewayFloodProtectionProfileBindingExists(context, getPolicyConnector(m), parentPath, id)
 	if err != nil {
 		return err
 	}
@@ -194,7 +203,11 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingRead(d *schema.Resour
 	}
 
 	parentPath := d.Get("parent_path").(string)
-	binding, err := resourceNsxtPolicyGatewayFloodProtectionProfileBindingGet(getSessionContext(d, m), connector, parentPath, id)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	binding, err := resourceNsxtPolicyGatewayFloodProtectionProfileBindingGet(context, connector, parentPath, id)
 	if err != nil {
 		return handleReadError(d, "GatewayFloodProtectionProfileBinding", id, err)
 	}
@@ -247,12 +260,16 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingDelete(d *schema.Reso
 		return err
 	}
 
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 	if tier0ID != "" {
 		if localeServiceID == "" {
-			bindingClient := tier0s.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
+			bindingClient := tier0s.NewFloodProtectionProfileBindingsClient(context, connector)
 			err = bindingClient.Delete(tier0ID, id)
 		} else {
-			bindingClient := t0localeservices.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
+			bindingClient := t0localeservices.NewFloodProtectionProfileBindingsClient(context, connector)
 			err = bindingClient.Delete(tier0ID, localeServiceID, id)
 		}
 		if err != nil {
@@ -260,10 +277,10 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingDelete(d *schema.Reso
 		}
 	} else if tier1ID != "" {
 		if localeServiceID == "" {
-			bindingClient := tier1s.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
+			bindingClient := tier1s.NewFloodProtectionProfileBindingsClient(context, connector)
 			err = bindingClient.Delete(tier1ID, id)
 		} else {
-			bindingClient := t1localeservices.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
+			bindingClient := t1localeservices.NewFloodProtectionProfileBindingsClient(context, connector)
 			err = bindingClient.Delete(tier1ID, localeServiceID, id)
 		}
 	}

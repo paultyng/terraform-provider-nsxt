@@ -29,7 +29,7 @@ func NewIpPoolsClient(sessionContext utl.SessionContext, connector vapiProtocolC
 	default:
 		return nil
 	}
-	return &IpAddressPoolClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &IpAddressPoolClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c IpAddressPoolClientContext) Get(ipPoolIdParam string) (model0.IpAddressPool, error) {

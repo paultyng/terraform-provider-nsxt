@@ -55,6 +55,30 @@ func TestAccResourceNsxtPolicyVlanSegment_basicImport_multitenancy(t *testing.T)
 	})
 }
 
+func TestAccResourceNsxtPolicyVlanSegment_basicImport_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_vlan_segment.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySegmentCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyVlanSegmentImportTemplate(name, false),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyVlanSegment_basicUpdate(t *testing.T) {
 	testAccResourceNsxtPolicyVlanSegmentBasicUpdate(t, false, func() {
 		testAccPreCheck(t)
@@ -65,6 +89,13 @@ func TestAccResourceNsxtPolicyVlanSegment_multitenancy(t *testing.T) {
 	testAccResourceNsxtPolicyVlanSegmentBasicUpdate(t, true, func() {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyVlanSegment_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyVlanSegmentBasicUpdate(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
 	})
 }
 

@@ -34,7 +34,7 @@ func NewSegmentsClient(sessionContext utl.SessionContext, connector vapiProtocol
 	default:
 		return nil
 	}
-	return &SegmentClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &SegmentClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c SegmentClientContext) Get(segmentIdParam string) (model0.Segment, error) {

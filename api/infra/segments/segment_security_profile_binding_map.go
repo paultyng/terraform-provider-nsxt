@@ -29,7 +29,7 @@ func NewSegmentSecurityProfileBindingMapsClient(sessionContext utl.SessionContex
 	default:
 		return nil
 	}
-	return &SegmentSecurityProfileBindingMapClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &SegmentSecurityProfileBindingMapClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c SegmentSecurityProfileBindingMapClientContext) Get(segmentIdParam string, segmentSecurityProfileBindingMapIdParam string) (model0.SegmentSecurityProfileBindingMap, error) {

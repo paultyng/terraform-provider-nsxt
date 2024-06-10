@@ -142,7 +142,10 @@ func resourceNsxtPolicyBgpConfigToStruct(d *schema.ResourceData, isVRF bool) (*m
 func resourceNsxtPolicyBgpConfigCreate(d *schema.ResourceData, m interface{}) error {
 	// This is not a create operation on NSX, since BGP config us auto created
 	connector := getPolicyConnector(m)
-	context := getSessionContext(d, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 
 	gwPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPath)

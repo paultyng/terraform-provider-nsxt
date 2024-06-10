@@ -27,6 +27,14 @@ func TestAccDataSourceNsxtPolicyVM_multitenancy(t *testing.T) {
 		testAccEnvDefined(t, "NSXT_TEST_VM_NAME")
 	})
 }
+func TestAccDataSourceNsxtPolicyVM_multitenancyProvider(t *testing.T) {
+	testAccDataSourceNsxtPolicyVMBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+		testAccEnvDefined(t, "NSXT_TEST_VM_ID")
+		testAccEnvDefined(t, "NSXT_TEST_VM_NAME")
+	})
+}
 func testAccDataSourceNsxtPolicyVMBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "data.nsxt_policy_vm.test"
 

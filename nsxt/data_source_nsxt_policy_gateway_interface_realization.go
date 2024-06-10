@@ -22,7 +22,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRealization() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"id":      getDataSourceIDSchema(),
-			"context": getContextSchema(false, false),
+			"context": getContextSchema(false, false, false),
 			"gateway_path": {
 				Type:         schema.TypeString,
 				Description:  "The path for the gateway",
@@ -72,7 +72,11 @@ func dataSourceNsxtPolicyGatewayInterfaceRealization() *schema.Resource {
 
 func dataSourceNsxtPolicyGatewayInterfaceRealizationRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := realizedstate.NewRealizedEntitiesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := realizedstate.NewRealizedEntitiesClient(context, connector)
 
 	id := d.Get("id").(string)
 	gatewayPath := d.Get("gateway_path").(string)
@@ -154,7 +158,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRealizationRead(d *schema.ResourceData,
 		MinTimeout: 1 * time.Second,
 		Delay:      time.Duration(delay) * time.Second,
 	}
-	_, err := stateConf.WaitForState()
+	_, err = stateConf.WaitForState()
 	if err != nil {
 		return fmt.Errorf("Failed to get gateway interface realization information for %s: %v", gatewayPath, err)
 	}

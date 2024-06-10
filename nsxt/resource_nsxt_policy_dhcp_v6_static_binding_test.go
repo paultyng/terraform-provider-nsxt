@@ -53,6 +53,13 @@ func TestAccResourceNsxtPolicyDhcpV6StaticBinding_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyDhcpV6StaticBinding_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyDhcpV6StaticBindingBasic(t, false, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func TestAccResourceNsxtPolicyDhcpV6StaticBinding_fixed(t *testing.T) {
 	testAccResourceNsxtPolicyDhcpV6StaticBindingBasic(t, true, false, func() {
 		testAccPreCheck(t)
@@ -65,6 +72,13 @@ func TestAccResourceNsxtPolicyDhcpV6StaticBinding_fixed_multitenancy(t *testing.
 	testAccResourceNsxtPolicyDhcpV6StaticBindingBasic(t, true, true, func() {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyDhcpV6StaticBinding_fixed_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyDhcpV6StaticBindingBasic(t, true, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
 	})
 }
 
@@ -178,6 +192,29 @@ func TestAccResourceNsxtPolicyDhcpV6StaticBinding_importBasic_multitenancy(t *te
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyDhcpV6StaticBindingMinimalistic(false, true),
+			},
+			{
+				ResourceName:      testAccPolicyDhcpV6StaticBindingResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testAccPolicyDhcpV6StaticBindingResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyDhcpV6StaticBinding_importBasic_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyDhcpV6StaticBindingCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyDhcpV6StaticBindingMinimalistic(false, false),
 			},
 			{
 				ResourceName:      testAccPolicyDhcpV6StaticBindingResourceName,

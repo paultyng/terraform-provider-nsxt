@@ -40,7 +40,7 @@ func resourceNsxtPolicyIPPoolBlockSubnet() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"auto_assign_gateway": {
 				Type:        schema.TypeBool,
 				Description: "If true, the first IP in the range will be reserved for gateway",
@@ -92,7 +92,11 @@ func resourceNsxtPolicyIPPoolBlockSubnetSchemaToStructValue(d *schema.ResourceDa
 
 func resourceNsxtPolicyIPPoolBlockSubnetRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := ippools.NewIpSubnetsClient(context, connector)
 	converter := bindings.NewTypeConverter()
 
 	poolPath := d.Get("pool_path").(string)
@@ -135,7 +139,11 @@ func resourceNsxtPolicyIPPoolBlockSubnetRead(d *schema.ResourceData, m interface
 
 func resourceNsxtPolicyIPPoolBlockSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := ippools.NewIpSubnetsClient(context, connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -170,7 +178,11 @@ func resourceNsxtPolicyIPPoolBlockSubnetCreate(d *schema.ResourceData, m interfa
 
 func resourceNsxtPolicyIPPoolBlockSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := ippools.NewIpSubnetsClient(context, connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -198,7 +210,11 @@ func resourceNsxtPolicyIPPoolBlockSubnetUpdate(d *schema.ResourceData, m interfa
 
 func resourceNsxtPolicyIPPoolBlockSubnetDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := ippools.NewIpSubnetsClient(context, connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -209,12 +225,12 @@ func resourceNsxtPolicyIPPoolBlockSubnetDelete(d *schema.ResourceData, m interfa
 	}
 
 	log.Printf("[INFO] Deleting Block Subnet with ID %s", id)
-	err := client.Delete(poolID, id, nil)
+	err = client.Delete(poolID, id, nil)
 	if err != nil {
 		return handleDeleteError("Block Subnet", id, err)
 	}
 
-	return resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(getSessionContext(d, m), d, connector)
+	return resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(context, d, connector)
 }
 
 // NOTE: This will not be needed when IPAM is handled by NSXT Policy
@@ -275,7 +291,11 @@ func resourceNsxtPolicyIPPoolSubnetImport(d *schema.ResourceData, m interface{})
 
 	poolID := s[0]
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return nil, err
+	}
+	client := infra.NewIpPoolsClient(context, connector)
 
 	pool, err := client.Get(poolID)
 	if err != nil {

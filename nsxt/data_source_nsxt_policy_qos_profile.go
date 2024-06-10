@@ -16,13 +16,17 @@ func dataSourceNsxtPolicyQosProfile() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 		},
 	}
 }
 
 func dataSourceNsxtPolicyQosProfileRead(d *schema.ResourceData, m interface{}) error {
-	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "QoSProfile", nil)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	_, err = policyDataSourceResourceRead(d, getPolicyConnector(m), context, "QoSProfile", nil)
 	if err != nil {
 		return err
 	}

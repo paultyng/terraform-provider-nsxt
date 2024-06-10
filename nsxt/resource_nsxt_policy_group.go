@@ -101,7 +101,7 @@ func resourceNsxtPolicyGroup() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"domain":       getDomainNameSchema(),
 			"group_type": {
 				Type:         schema.TypeString,
@@ -879,7 +879,11 @@ func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error 
 		obj.GroupType = groupTypes
 	}
 
-	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := domains.NewGroupsClient(context, connector)
 	err = client.Patch(d.Get("domain").(string), id, obj)
 
 	// Create the resource using PATCH
@@ -901,7 +905,11 @@ func resourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
 	if id == "" {
 		return fmt.Errorf("Error obtaining Group ID")
 	}
-	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := domains.NewGroupsClient(context, connector)
 	obj, err := client.Get(domainName, id)
 	if err != nil {
 		return handleReadError(d, "Group", id, err)
@@ -992,7 +1000,11 @@ func resourceNsxtPolicyGroupUpdate(d *schema.ResourceData, m interface{}) error 
 		obj.GroupType = groupTypes
 	}
 
-	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := domains.NewGroupsClient(context, connector)
 
 	// Update the resource using PATCH
 	err = client.Patch(d.Get("domain").(string), id, obj)
@@ -1014,7 +1026,11 @@ func resourceNsxtPolicyGroupDelete(d *schema.ResourceData, m interface{}) error 
 	failIfSubtreeExists := false
 
 	doDelete := func() error {
-		client := domains.NewGroupsClient(getSessionContext(d, m), connector)
+		context, err := getSessionContext(d, m)
+		if err != nil {
+			return err
+		}
+		client := domains.NewGroupsClient(context, connector)
 		return client.Delete(d.Get("domain").(string), id, &failIfSubtreeExists, &forceDelete)
 	}
 

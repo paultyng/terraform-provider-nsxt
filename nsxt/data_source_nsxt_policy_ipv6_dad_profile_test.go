@@ -27,6 +27,13 @@ func TestAccDataSourceNsxtPolicyIpv6DadProfile_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicyIpv6DadProfile_multitenancyProvider(t *testing.T) {
+	testAccDataSourceNsxtPolicyIpv6DadProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccDataSourceNsxtPolicyIpv6DadProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_ipv6_dad_profile.test"

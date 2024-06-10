@@ -34,7 +34,7 @@ func NewFirewallFloodProtectionProfileBindingMapsClient(sessionContext utl.Sessi
 	default:
 		return nil
 	}
-	return &PolicyFirewallFloodProtectionProfileBindingMapClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &PolicyFirewallFloodProtectionProfileBindingMapClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c PolicyFirewallFloodProtectionProfileBindingMapClientContext) Get(domainIdParam string, groupIdParam string, firewallFloodProtectionProfileBindingMapIdParam string) (model0.PolicyFirewallFloodProtectionProfileBindingMap, error) {

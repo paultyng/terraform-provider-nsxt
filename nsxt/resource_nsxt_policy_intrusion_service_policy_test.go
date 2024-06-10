@@ -29,6 +29,13 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicy_multitenancy(t *testing.T) 
 	})
 }
 
+func TestAccResourceNsxtPolicyIntrusionServicePolicy_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyIntrusionServicePolicyBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyIntrusionServicePolicyBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
@@ -216,6 +223,13 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicy_importBasic_multitenancy(t 
 	testAccResourceNsxtPolicyIntrusionServicePolicyImportBasic(t, true, func() {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyIntrusionServicePolicy_importBasic_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyIntrusionServicePolicyImportBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
 	})
 }
 

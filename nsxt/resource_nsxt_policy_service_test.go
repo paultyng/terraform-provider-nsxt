@@ -26,6 +26,13 @@ func TestAccResourceNsxtPolicyService_icmp_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyService_icmp_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyServiceIcmp(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyServiceIcmp(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updateName := getAccTestResourceName()
@@ -747,6 +754,30 @@ func TestAccResourceNsxtPolicyService_importBasic_multitenancy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyIcmpTypeServiceCreateNoTypeCodeTemplate(name, "ICMPv4", true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyService_importBasic_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_service.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyServiceCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyIcmpTypeServiceCreateNoTypeCodeTemplate(name, "ICMPv4", false),
 			},
 			{
 				ResourceName:      testResourceName,

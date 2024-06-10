@@ -58,7 +58,7 @@ func dataSourceNsxtPolicyVMs() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"context": getContextSchema(false, false),
+			"context": getContextSchema(false, false, false),
 		},
 	}
 }
@@ -71,7 +71,11 @@ func dataSourceNsxtPolicyVMsRead(d *schema.ResourceData, m interface{}) error {
 	osPrefix := d.Get("guest_os").(string)
 	vmMap := make(map[string]interface{})
 
-	allVMs, err := listAllPolicyVirtualMachines(getSessionContext(d, m), connector, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	allVMs, err := listAllPolicyVirtualMachines(context, connector, m)
 	if err != nil {
 		return fmt.Errorf("Error reading Virtual Machines: %v", err)
 	}

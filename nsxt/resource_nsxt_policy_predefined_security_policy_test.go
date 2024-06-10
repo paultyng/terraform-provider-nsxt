@@ -25,6 +25,13 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_multitenancy(t *testing.T
 	})
 }
 
+func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyPredefinedSecurityPolicyBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyPredefinedSecurityPolicyBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_predefined_security_policy.test"
 	description1 := "test 1"

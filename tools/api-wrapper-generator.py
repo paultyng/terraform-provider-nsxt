@@ -76,6 +76,9 @@ def api_func_call_setup(api, subs_dict):
     arg_list = get_arglist(g[2])
     if subs_dict['type'] == "Multitenancy":
         arg_list = ['utl.DefaultOrgID', 'c.ProjectID'] + arg_list
+    elif subs_dict['type'] == "VPC":
+        arg_list = ['utl.DefaultOrgID', 'c.ProjectID', 'c.VPCID'] + arg_list
+        arg_list.remove('domainIdParam')
     return '%s(%s)' % (g[1], ', '.join(arg_list))
 
 
@@ -88,6 +91,9 @@ def patch_func_call_setup(api, subs_dict):
                 arg_list[n] = 'gmObj.(%s.%s)' % (subs_dict['model_import'], subs_dict['model_name'])
     elif subs_dict['type'] == "Multitenancy":
         arg_list = ['utl.DefaultOrgID', 'c.ProjectID'] + arg_list
+    elif subs_dict['type'] == "VPC":
+        arg_list = ['utl.DefaultOrgID', 'c.ProjectID', 'c.VPCID'] + arg_list
+        arg_list.remove('domainIdParam')
     return '%s(%s)' % (g[1], ', '.join(arg_list))
 
 

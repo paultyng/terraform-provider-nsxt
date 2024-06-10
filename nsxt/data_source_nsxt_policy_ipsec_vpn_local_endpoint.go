@@ -49,7 +49,11 @@ func dataSourceNsxtPolicyIPSecVpnLocalEndpointRead(d *schema.ResourceData, m int
 		}
 		query["parent_path"] = fmt.Sprintf("%s*", servicePath)
 	}
-	objInt, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), "IPSecVpnLocalEndpoint", query, false)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	objInt, err := policyDataSourceResourceReadWithValidation(d, connector, context, "IPSecVpnLocalEndpoint", query, false)
 	if err != nil {
 		return err
 	}

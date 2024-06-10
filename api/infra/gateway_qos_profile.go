@@ -34,7 +34,7 @@ func NewGatewayQosProfilesClient(sessionContext utl.SessionContext, connector va
 	default:
 		return nil
 	}
-	return &GatewayQosProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &GatewayQosProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c GatewayQosProfileClientContext) Get(qosProfileIdParam string) (model0.GatewayQosProfile, error) {

@@ -32,7 +32,7 @@ func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"server_addresses": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -62,7 +62,11 @@ func resourceNsxtPolicyDhcpRelayConfigExists(sessionContext utl.SessionContext, 
 
 func resourceNsxtPolicyDhcpRelayConfigCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDhcpRelayConfigsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewDhcpRelayConfigsClient(context, connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -101,7 +105,11 @@ func resourceNsxtPolicyDhcpRelayConfigCreate(d *schema.ResourceData, m interface
 
 func resourceNsxtPolicyDhcpRelayConfigRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDhcpRelayConfigsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewDhcpRelayConfigsClient(context, connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -131,7 +139,11 @@ func resourceNsxtPolicyDhcpRelayConfigRead(d *schema.ResourceData, m interface{}
 
 func resourceNsxtPolicyDhcpRelayConfigUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDhcpRelayConfigsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewDhcpRelayConfigsClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -157,7 +169,7 @@ func resourceNsxtPolicyDhcpRelayConfigUpdate(d *schema.ResourceData, m interface
 		Revision:        &revision,
 	}
 
-	_, err := client.Update(id, obj)
+	_, err = client.Update(id, obj)
 	if err != nil {
 		return handleUpdateError("DhcpRelayConfig", id, err)
 	}
@@ -172,12 +184,16 @@ func resourceNsxtPolicyDhcpRelayConfigDelete(d *schema.ResourceData, m interface
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewDhcpRelayConfigsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewDhcpRelayConfigsClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
 
-	err := client.Delete(id)
+	err = client.Delete(id)
 	if err != nil {
 		return handleDeleteError("DhcpRelayConfig", id, err)
 	}

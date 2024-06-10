@@ -29,7 +29,7 @@ func NewPortsClient(sessionContext utl.SessionContext, connector vapiProtocolCli
 	default:
 		return nil
 	}
-	return &SegmentPortClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &SegmentPortClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c SegmentPortClientContext) Get(segmentIdParam string, portIdParam string) (model0.SegmentPort, error) {

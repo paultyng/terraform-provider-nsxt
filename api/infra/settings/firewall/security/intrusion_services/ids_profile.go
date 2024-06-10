@@ -29,7 +29,7 @@ func NewProfilesClient(sessionContext utl.SessionContext, connector vapiProtocol
 	default:
 		return nil
 	}
-	return &IdsProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &IdsProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c IdsProfileClientContext) Get(profileIdParam string) (model0.IdsProfile, error) {

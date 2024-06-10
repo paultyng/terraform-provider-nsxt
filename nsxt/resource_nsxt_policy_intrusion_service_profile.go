@@ -56,7 +56,7 @@ func resourceNsxtPolicyIntrusionServiceProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"criteria": {
 				Type:        schema.TypeList,
 				Description: "Filtering criteria for the IDS Profile",
@@ -373,7 +373,11 @@ func resourceNsxtPolicyIntrusionServiceProfileCreate(d *schema.ResourceData, m i
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Intrusion Service Profile with ID %s", id)
-	client := services.NewProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := services.NewProfilesClient(context, connector)
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("Ids Profile", id, err)
@@ -393,7 +397,11 @@ func resourceNsxtPolicyIntrusionServiceProfileRead(d *schema.ResourceData, m int
 		return fmt.Errorf("Error obtaining Ids Profile ID")
 	}
 
-	client := services.NewProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := services.NewProfilesClient(context, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Ids Profile", id, err)
@@ -449,7 +457,11 @@ func resourceNsxtPolicyIntrusionServiceProfileUpdate(d *schema.ResourceData, m i
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Update Intrusion Service Profile with ID %s", id)
-	client := services.NewProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := services.NewProfilesClient(context, connector)
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleUpdateError("Ids Profile", id, err)
@@ -468,8 +480,11 @@ func resourceNsxtPolicyIntrusionServiceProfileDelete(d *schema.ResourceData, m i
 	}
 
 	connector := getPolicyConnector(m)
-	var err error
-	client := services.NewProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := services.NewProfilesClient(context, connector)
 	err = client.Delete(id)
 
 	if err != nil {

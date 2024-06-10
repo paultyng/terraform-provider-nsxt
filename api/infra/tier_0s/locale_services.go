@@ -30,7 +30,7 @@ func NewLocaleServicesClient(sessionContext utl.SessionContext, connector vapiPr
 	default:
 		return nil
 	}
-	return &LocaleServicesClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &LocaleServicesClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c LocaleServicesClientContext) Get(tier0IdParam string, localeServicesIdParam string) (model0.LocaleServices, error) {

@@ -24,6 +24,13 @@ func TestAccResourceNsxtPolicyQosProfile_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyQosProfile_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyQosProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyQosProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
@@ -147,6 +154,29 @@ func TestAccResourceNsxtPolicyQosProfile_importBasic_multitenancy(t *testing.T) 
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNSXPolicyQosProfileCreateTemplateTrivial(name, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyQosProfile_importBasic_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_qos_profile.test"
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXPolicyQosProfileCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyQosProfileCreateTemplateTrivial(name, false),
 			},
 			{
 				ResourceName:      testResourceName,

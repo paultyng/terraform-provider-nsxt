@@ -56,6 +56,13 @@ func TestAccResourceNsxtPolicyIPDiscoveryProfile_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyIPDiscoveryProfile_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyIPDiscoveryProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyIPDiscoveryProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_ip_discovery_profile.test"
 
@@ -176,6 +183,30 @@ func TestAccResourceNsxtPolicyIPDiscoveryProfile_importBasic_multitenancy(t *tes
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyIPDiscoveryProfileMinimalistic(true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyIPDiscoveryProfile_importBasic_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_ip_discovery_profile.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyIPDiscoveryProfileCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyIPDiscoveryProfileMinimalistic(false),
 			},
 			{
 				ResourceName:      testResourceName,

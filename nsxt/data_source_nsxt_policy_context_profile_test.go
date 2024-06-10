@@ -65,7 +65,30 @@ func TestAccDataSourceNsxtPolicyContextProfile_multitenancy(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyContextProfileMultitenancyTemplate(name),
+				Config: testAccNsxtPolicyContextProfileMultitenancyTemplate(name, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttrSet(testResourceName, "description"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataSourceNsxtPolicyContextProfile_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "data.nsxt_policy_context_profile.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyMultitenancyProvider(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyContextProfileMultitenancyTemplate(name, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttrSet(testResourceName, "description"),
@@ -83,9 +106,12 @@ data "nsxt_policy_context_profile" "test" {
 }`, name)
 }
 
-func testAccNsxtPolicyContextProfileMultitenancyTemplate(name string) string {
-	context := testAccNsxtPolicyMultitenancyContext()
-	return fmt.Sprintf(`
+func testAccNsxtPolicyContextProfileMultitenancyTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+	s := fmt.Sprintf(`
 resource "nsxt_policy_context_profile" "test" {
 %s
   display_name = "%s"
@@ -107,4 +133,5 @@ data "nsxt_policy_context_profile" "test" {
 %s
   display_name = nsxt_policy_context_profile.test.display_name
 }`, context, name, context)
+	return s
 }

@@ -34,7 +34,7 @@ func NewDhcpRelayConfigsClient(sessionContext utl.SessionContext, connector vapi
 	default:
 		return nil
 	}
-	return &DhcpRelayConfigClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &DhcpRelayConfigClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c DhcpRelayConfigClientContext) Get(dhcpRelayConfigIdParam string) (model0.DhcpRelayConfig, error) {

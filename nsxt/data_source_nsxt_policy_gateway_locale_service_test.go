@@ -88,6 +88,13 @@ func TestAccDataSourceNsxtPolicyGatewayLocaleService_multitenancy(t *testing.T) 
 	})
 }
 
+func TestAccDataSourceNsxtPolicyGatewayLocaleService_multitenancyProvider(t *testing.T) {
+	testAccDataSourceNsxtPolicyGatewayLocaleServiceDefault(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccNsxtPolicyGatewayLocaleServiceTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {

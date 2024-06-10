@@ -30,7 +30,7 @@ func NewDnsForwarderClient(sessionContext utl.SessionContext, connector vapiProt
 	default:
 		return nil
 	}
-	return &PolicyDnsForwarderClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &PolicyDnsForwarderClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c PolicyDnsForwarderClientContext) Get(tier0IdParam string) (model0.PolicyDnsForwarder, error) {

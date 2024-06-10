@@ -34,7 +34,7 @@ func NewGroupsClient(sessionContext utl.SessionContext, connector vapiProtocolCl
 	default:
 		return nil
 	}
-	return &GroupClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &GroupClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c GroupClientContext) Get(domainIdParam string, groupIdParam string) (model0.Group, error) {

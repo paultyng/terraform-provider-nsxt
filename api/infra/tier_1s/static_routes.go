@@ -34,7 +34,7 @@ func NewStaticRoutesClient(sessionContext utl.SessionContext, connector vapiProt
 	default:
 		return nil
 	}
-	return &StaticRoutesClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &StaticRoutesClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c StaticRoutesClientContext) Get(tier1IdParam string, routeIdParam string) (model0.StaticRoutes, error) {

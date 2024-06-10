@@ -27,7 +27,7 @@ func dataSourceNsxtPolicyRealizationInfo() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validatePolicyPath(),
 			},
-			"context": getContextSchema(false, false),
+			"context": getContextSchema(false, false, false),
 			"entity_type": {
 				Type:        schema.TypeString,
 				Description: "The entity type of the realized resource",
@@ -79,6 +79,11 @@ func dataSourceNsxtPolicyRealizationInfoRead(d *schema.ResourceData, m interface
 	delay := d.Get("delay").(int)
 	timeout := d.Get("timeout").(int)
 
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+
 	// Site is mandatory got GM and irrelevant else
 	if !isPolicyGlobalManager(m) && objSitePath != "" {
 		return globalManagerOnlyError()
@@ -104,7 +109,7 @@ func dataSourceNsxtPolicyRealizationInfoRead(d *schema.ResourceData, m interface
 
 			var realizationError error
 			var realizationResult model.GenericPolicyRealizedResourceListResult
-			client := realizedstate.NewRealizedEntitiesClient(getSessionContext(d, m), connector)
+			client := realizedstate.NewRealizedEntitiesClient(context, connector)
 			realizationResult, realizationError = client.List(path, nil)
 			state := "UNKNOWN"
 			if realizationError == nil {
@@ -146,7 +151,7 @@ func dataSourceNsxtPolicyRealizationInfoRead(d *schema.ResourceData, m interface
 		MinTimeout: 1 * time.Second,
 		Delay:      time.Duration(delay) * time.Second,
 	}
-	_, err := stateConf.WaitForState()
+	_, err = stateConf.WaitForState()
 	if err != nil {
 		return fmt.Errorf("Failed to get realization information for %s: %v", path, err)
 	}

@@ -680,7 +680,25 @@ func handlePagination(lister func(*paginationInfo) error) (int64, error) {
 	return total, nil
 }
 
-func getContextSchema(isRequired, isComputed bool) *schema.Schema {
+func getContextSchema(isRequired, isComputed, isVPC bool) *schema.Schema {
+	elemSchema := map[string]*schema.Schema{
+		"project_id": {
+			Type:         schema.TypeString,
+			Description:  "Id of the project which the resource belongs to.",
+			Required:     true,
+			ForceNew:     true,
+			ValidateFunc: validation.StringIsNotWhiteSpace,
+		},
+	}
+	if isVPC {
+		elemSchema["vpc_id"] = &schema.Schema{
+			Type:         schema.TypeString,
+			Description:  "Id of the VPC which the resource belongs to.",
+			Optional:     true,
+			ForceNew:     true,
+			ValidateFunc: validation.StringIsNotWhiteSpace,
+		}
+	}
 	return &schema.Schema{
 		Type:        schema.TypeList,
 		Description: "Resource context",
@@ -690,15 +708,7 @@ func getContextSchema(isRequired, isComputed bool) *schema.Schema {
 		MaxItems:    1,
 		ForceNew:    true,
 		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"project_id": {
-					Type:         schema.TypeString,
-					Description:  "Id of the project which the resource belongs to.",
-					Required:     true,
-					ForceNew:     true,
-					ValidateFunc: validation.StringIsNotWhiteSpace,
-				},
-			},
+			Schema: elemSchema,
 		},
 	}
 }

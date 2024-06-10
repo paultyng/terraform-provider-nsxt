@@ -34,7 +34,7 @@ func NewContextProfilesClient(sessionContext utl.SessionContext, connector vapiP
 	default:
 		return nil
 	}
-	return &PolicyContextProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &PolicyContextProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c PolicyContextProfileClientContext) Get(contextProfileIdParam string) (model0.PolicyContextProfile, error) {

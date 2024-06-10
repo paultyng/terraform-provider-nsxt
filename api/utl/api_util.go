@@ -11,16 +11,19 @@ const (
 	Global       = 0
 	Local        = 1
 	Multitenancy = 2
+	VPC          = 3
 )
 
 type SessionContext struct {
 	ClientType ClientType
 	ProjectID  string
+	VPCID      string
 }
 type ClientContext struct {
 	Client     interface{}
 	ClientType ClientType
 	ProjectID  string
+	VPCID      string
 }
 
 func ConvertModelBindingType(obj interface{}, sourceType bindings.BindingType, destType bindings.BindingType) (interface{}, error) {

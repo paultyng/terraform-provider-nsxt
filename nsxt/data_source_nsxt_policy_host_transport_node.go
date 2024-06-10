@@ -28,7 +28,11 @@ func dataSourceNsxtPolicyHostTransportNode() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyHostTransportNodeRead(d *schema.ResourceData, m interface{}) error {
-	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "HostTransportNode", nil)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), context, "HostTransportNode", nil)
 	if err != nil {
 		return err
 	}

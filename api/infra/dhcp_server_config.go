@@ -34,7 +34,7 @@ func NewDhcpServerConfigsClient(sessionContext utl.SessionContext, connector vap
 	default:
 		return nil
 	}
-	return &DhcpServerConfigClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &DhcpServerConfigClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c DhcpServerConfigClientContext) Get(dhcpServerConfigIdParam string) (model0.DhcpServerConfig, error) {

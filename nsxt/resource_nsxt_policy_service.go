@@ -36,7 +36,7 @@ func resourceNsxtPolicyService() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 
 			"icmp_entry": {
 				Type:        schema.TypeSet,
@@ -470,7 +470,11 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating service with ID %s", id)
 
-	client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewServicesClient(context, connector)
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("Service", id, err)
@@ -489,7 +493,11 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("Error obtaining service id")
 	}
 
-	client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewServicesClient(context, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Service", id, err)
@@ -680,8 +688,12 @@ func resourceNsxtPolicyServiceUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	// Update the resource using Update to totally replace the list of entries
-	client := infra.NewServicesClient(getSessionContext(d, m), connector)
-	_, err := client.Update(id, obj)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewServicesClient(context, connector)
+	_, err = client.Update(id, obj)
 
 	if err != nil {
 		return handleUpdateError("Service", id, err)
@@ -698,7 +710,11 @@ func resourceNsxtPolicyServiceDelete(d *schema.ResourceData, m interface{}) erro
 	connector := getPolicyConnector(m)
 
 	doDelete := func() error {
-		client := infra.NewServicesClient(getSessionContext(d, m), connector)
+		context, err := getSessionContext(d, m)
+		if err != nil {
+			return err
+		}
+		client := infra.NewServicesClient(context, connector)
 		return client.Delete(id)
 	}
 

@@ -60,6 +60,13 @@ func TestAccResourceNsxtPolicyDhcpV4StaticBinding_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyDhcpV4StaticBinding_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyDhcpV4StaticBindingBasic(t, false, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func TestAccResourceNsxtPolicyDhcpV4StaticBinding_fixedSegment(t *testing.T) {
 	testAccResourceNsxtPolicyDhcpV4StaticBindingBasic(t, true, false, func() {
 		testAccPreCheck(t)
@@ -72,6 +79,13 @@ func TestAccResourceNsxtPolicyDhcpV4StaticBinding_fixedSegment_multitenancy(t *t
 	testAccResourceNsxtPolicyDhcpV4StaticBindingBasic(t, true, true, func() {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyDhcpV4StaticBinding_fixedSegment_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyDhcpV4StaticBindingBasic(t, true, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
 	})
 }
 
@@ -171,6 +185,29 @@ func TestAccResourceNsxtPolicyDhcpV4StaticBinding_importBasic_multitenancy(t *te
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyDhcpV4StaticBindingMinimalistic(false, true),
+			},
+			{
+				ResourceName:      testAccPolicyDhcpV4StaticBindingResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testAccPolicyDhcpV4StaticBindingResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyDhcpV4StaticBinding_importBasic_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyDhcpV4StaticBindingCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyDhcpV4StaticBindingMinimalistic(false, false),
 			},
 			{
 				ResourceName:      testAccPolicyDhcpV4StaticBindingResourceName,

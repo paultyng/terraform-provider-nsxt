@@ -56,6 +56,30 @@ func TestAccResourceNsxtPolicyGroup_basicImport_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyGroup_basicImport_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_group.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGroupIPAddressImportTemplate(name, false),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyGroup_addressCriteria(t *testing.T) {
 	testAccResourceNsxtPolicyGroupAddressCriteria(t, false, func() {
 		testAccPreCheck(t)
@@ -66,6 +90,13 @@ func TestAccResourceNsxtPolicyGroup_addressCriteria_multitenancy(t *testing.T) {
 	testAccResourceNsxtPolicyGroupAddressCriteria(t, true, func() {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyGroup_addressCriteria_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyGroupAddressCriteria(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
 	})
 }
 

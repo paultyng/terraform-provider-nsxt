@@ -21,6 +21,13 @@ func TestAccDataSourceNsxtPolicyDhcpServer_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicyDhcpServer_multitenancyProvider(t *testing.T) {
+	testAccDataSourceNsxtPolicyDhcpServerBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccDataSourceNsxtPolicyDhcpServerBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_dhcp_server.test"

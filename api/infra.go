@@ -29,7 +29,7 @@ func NewInfraClient(sessionContext utl.SessionContext, connector vapiProtocolCli
 	default:
 		return nil
 	}
-	return &InfraClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &InfraClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c InfraClientContext) Get(basePathParam *string, filterParam *string, typeFilterParam *string) (model0.Infra, error) {

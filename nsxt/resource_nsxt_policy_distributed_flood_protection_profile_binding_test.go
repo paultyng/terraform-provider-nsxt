@@ -37,6 +37,13 @@ func TestAccResourceNsxtPolicyDistributedFloodProtectionProfileBinding_multitena
 	})
 }
 
+func TestAccResourceNsxtPolicyDistributedFloodProtectionProfileBinding_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyDistributedFloodProtectionProfileBindingBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyDistributedFloodProtectionProfileBindingBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_distributed_flood_protection_profile_binding.test"
 	if withContext {
@@ -96,6 +103,13 @@ func TestAccResourceNsxtPolicyDistributedFloodProtectionProfileBinding_importBas
 	testAccResourceNsxtPolicyDistributedFloodProtectionProfileBindingImportBasic(t, true, func() {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyDistributedFloodProtectionProfileBinding_importBasic_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyDistributedFloodProtectionProfileBindingImportBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
 	})
 }
 

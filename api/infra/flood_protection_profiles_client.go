@@ -35,7 +35,7 @@ func NewFloodProtectionProfilesClient(sessionContext utl.SessionContext, connect
 	default:
 		return nil
 	}
-	return &StructValueClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &StructValueClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c StructValueClientContext) Get(floodProtectionProfileIdParam string) (*model0.StructValue, error) {

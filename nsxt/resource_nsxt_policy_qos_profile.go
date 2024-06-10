@@ -37,7 +37,7 @@ func resourceNsxtPolicyQosProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"class_of_service": {
 				Type:         schema.TypeInt,
 				Description:  "Class of service",
@@ -174,7 +174,11 @@ func resourceNsxtPolicyQosProfileCreate(d *schema.ResourceData, m interface{}) e
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating QosProfile with ID %s", id)
 	boolFalse := false
-	client := infra.NewQosProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewQosProfilesClient(context, connector)
 	err = client.Patch(id, obj, &boolFalse)
 	if err != nil {
 		return handleCreateError("QosProfile", id, err)
@@ -194,7 +198,11 @@ func resourceNsxtPolicyQosProfileRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Error obtaining QosProfile ID")
 	}
 
-	client := infra.NewQosProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewQosProfilesClient(context, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "QosProfile", id, err)
@@ -222,7 +230,11 @@ func resourceNsxtPolicyQosProfileRead(d *schema.ResourceData, m interface{}) err
 
 func resourceNsxtPolicyQosProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewQosProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewQosProfilesClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -267,7 +279,7 @@ func resourceNsxtPolicyQosProfileUpdate(d *schema.ResourceData, m interface{}) e
 	// Create the resource using PATCH
 	log.Printf("[INFO] Updating QosProfile with ID %s", id)
 	boolFalse := false
-	err := client.Patch(id, obj, &boolFalse)
+	err = client.Patch(id, obj, &boolFalse)
 	if err != nil {
 		d.Partial(true)
 		return handleUpdateError("QosProfile", id, err)
@@ -284,8 +296,12 @@ func resourceNsxtPolicyQosProfileDelete(d *schema.ResourceData, m interface{}) e
 
 	connector := getPolicyConnector(m)
 	boolFalse := false
-	client := infra.NewQosProfilesClient(getSessionContext(d, m), connector)
-	err := client.Delete(id, &boolFalse)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewQosProfilesClient(context, connector)
+	err = client.Delete(id, &boolFalse)
 
 	if err != nil {
 		return handleDeleteError("QosProfile", id, err)

@@ -36,7 +36,11 @@ func dataSourceNsxtPolicyTier0Gateway() *schema.Resource {
 
 func dataSourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	obj, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "Tier0", nil)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	obj, err := policyDataSourceResourceRead(d, connector, context, "Tier0", nil)
 	if err != nil {
 		return err
 	}
@@ -51,7 +55,7 @@ func dataSourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{})
 			return errors[0]
 		}
 		gw := dataValue.(model.Tier0)
-		err := resourceNsxtPolicyTier0GatewayReadEdgeCluster(getSessionContext(d, m), d, connector)
+		err := resourceNsxtPolicyTier0GatewayReadEdgeCluster(context, d, connector)
 		if err != nil {
 			return fmt.Errorf("failed to get Tier0 %s locale-services: %v", *gw.Id, err)
 		}

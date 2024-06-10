@@ -34,7 +34,7 @@ func NewGatewayPoliciesClient(sessionContext utl.SessionContext, connector vapiP
 	default:
 		return nil
 	}
-	return &GatewayPolicyClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &GatewayPolicyClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c GatewayPolicyClientContext) Get(domainIdParam string, gatewayPolicyIdParam string) (model0.GatewayPolicy, error) {

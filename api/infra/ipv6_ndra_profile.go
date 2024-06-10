@@ -34,7 +34,7 @@ func NewIpv6NdraProfilesClient(sessionContext utl.SessionContext, connector vapi
 	default:
 		return nil
 	}
-	return &Ipv6NdraProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &Ipv6NdraProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c Ipv6NdraProfileClientContext) Get(ndraProfileIdParam string) (model0.Ipv6NdraProfile, error) {

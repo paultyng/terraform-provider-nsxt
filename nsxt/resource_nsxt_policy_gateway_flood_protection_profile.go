@@ -83,7 +83,11 @@ func resourceNsxtPolicyGatewayFloodProtectionProfilePatch(d *schema.ResourceData
 	profileStruct := profileValue.(*data.StructValue)
 
 	log.Printf("[INFO] Patching GatewayFloodProtectionProfile with ID %s", id)
-	client := infra.NewFloodProtectionProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewFloodProtectionProfilesClient(context, connector)
 	return client.Patch(id, profileStruct, nil)
 }
 
@@ -115,7 +119,11 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileRead(d *schema.ResourceData,
 		return fmt.Errorf("Error obtaining FloodProtectionProfile ID")
 	}
 
-	client := infra.NewFloodProtectionProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewFloodProtectionProfilesClient(context, connector)
 	gpffData, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "GatewayFloodProtectionProfile", id, err)

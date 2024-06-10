@@ -25,7 +25,7 @@ func dataSourceNsxtPolicySecurityPolicy() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"domain":       getDataSourceDomainNameSchema(),
 			"is_default": {
 				Type:        schema.TypeBool,
@@ -82,7 +82,10 @@ func dataSourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{
 	objName := d.Get("display_name").(string)
 
 	var obj model.SecurityPolicy
-	context := getSessionContext(d, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 	if objID != "" {
 		// Get by id
 		client := domains.NewSecurityPoliciesClient(context, connector)

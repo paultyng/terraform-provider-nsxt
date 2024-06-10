@@ -16,7 +16,7 @@ func dataSourceNsxtPolicyIntrusionServiceProfile() *schema.Resource {
 			"display_name": getDataSourceExtendedDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 		},
 	}
 }
@@ -28,7 +28,11 @@ func dataSourceNsxtPolicyIntrusionServiceProfileRead(d *schema.ResourceData, m i
 		return localManagerOnlyError()
 	}
 
-	_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "IdsProfile", nil)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	_, err = policyDataSourceResourceRead(d, connector, context, "IdsProfile", nil)
 	if err != nil {
 		return err
 	}

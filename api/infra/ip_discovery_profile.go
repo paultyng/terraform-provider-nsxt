@@ -34,7 +34,7 @@ func NewIpDiscoveryProfilesClient(sessionContext utl.SessionContext, connector v
 	default:
 		return nil
 	}
-	return &IPDiscoveryProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &IPDiscoveryProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c IPDiscoveryProfileClientContext) Get(ipDiscoveryProfileIdParam string) (model0.IPDiscoveryProfile, error) {

@@ -30,7 +30,7 @@ func NewNatRulesClient(sessionContext utl.SessionContext, connector vapiProtocol
 	default:
 		return nil
 	}
-	return &PolicyNatRuleClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &PolicyNatRuleClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c PolicyNatRuleClientContext) Get(tier0IdParam string, natIdParam string, natRuleIdParam string) (model0.PolicyNatRule, error) {

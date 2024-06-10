@@ -43,12 +43,16 @@ func resourceNsxtPolicySecurityPolicyRuleCreate(d *schema.ResourceData, m interf
 		return err
 	}
 
-	if err := setSecurityPolicyRuleContext(d, projectID); err != nil {
+	if err := setSecurityPolicyRuleContext(d, m, projectID); err != nil {
 		return handleCreateError("SecurityPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
 	}
 
 	log.Printf("[INFO] Creating Security Policy Rule with ID %s under policy %s", id, policyPath)
-	client := securitypolicies.NewRulesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := securitypolicies.NewRulesClient(context, connector)
 	rule := securityPolicyRuleSchemaToModel(d, id)
 	err = client.Patch(domain, policyID, id, rule)
 	if err != nil {
@@ -61,8 +65,11 @@ func resourceNsxtPolicySecurityPolicyRuleCreate(d *schema.ResourceData, m interf
 	return resourceNsxtPolicySecurityPolicyRuleRead(d, m)
 }
 
-func setSecurityPolicyRuleContext(d *schema.ResourceData, projectID string) error {
-	providedProjectID := getProjectIDFromSchema(d)
+func setSecurityPolicyRuleContext(d *schema.ResourceData, m interface{}, projectID string) error {
+	providedProjectID, _, err := getContextDataFromSchema(d, m)
+	if err != nil {
+		return err
+	}
 	if providedProjectID == "" {
 		contexts := make([]interface{}, 1)
 		ctxMap := make(map[string]interface{})
@@ -157,11 +164,15 @@ func resourceNsxtPolicySecurityPolicyRuleRead(d *schema.ResourceData, m interfac
 	domain := getDomainFromResourcePath(policyPath)
 	policyID := getPolicyIDFromPath(policyPath)
 
-	if err := setSecurityPolicyRuleContext(d, projectID); err != nil {
+	if err := setSecurityPolicyRuleContext(d, m, projectID); err != nil {
 		return handleReadError(d, "SecurityPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
 	}
 
-	client := securitypolicies.NewRulesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := securitypolicies.NewRulesClient(context, connector)
 	rule, err := client.Get(domain, policyID, id)
 	if err != nil {
 		return handleReadError(d, "SecurityPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
@@ -214,9 +225,13 @@ func resourceNsxtPolicySecurityPolicyRuleUpdate(d *schema.ResourceData, m interf
 	domain := getDomainFromResourcePath(policyPath)
 	policyID := getPolicyIDFromPath(policyPath)
 
-	client := securitypolicies.NewRulesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := securitypolicies.NewRulesClient(context, connector)
 	rule := securityPolicyRuleSchemaToModel(d, id)
-	err := client.Patch(domain, policyID, id, rule)
+	err = client.Patch(domain, policyID, id, rule)
 	if err != nil {
 		return handleUpdateError("SecurityPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
 	}
@@ -237,7 +252,11 @@ func resourceNsxtPolicySecurityPolicyRuleDelete(d *schema.ResourceData, m interf
 	domain := getDomainFromResourcePath(policyPath)
 	policyID := getPolicyIDFromPath(policyPath)
 
-	client := securitypolicies.NewRulesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := securitypolicies.NewRulesClient(context, connector)
 	return client.Delete(domain, policyID, id)
 }
 

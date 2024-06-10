@@ -62,7 +62,11 @@ func parentSecurityPolicyModelToSchema(d *schema.ResourceData, m interface{}) (*
 	if id == "" {
 		return nil, fmt.Errorf("Error obtaining Security Policy id")
 	}
-	client := domains.NewSecurityPoliciesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return nil, err
+	}
+	client := domains.NewSecurityPoliciesClient(context, connector)
 	obj, err := client.Get(domainName, id)
 	if err != nil {
 		return nil, err

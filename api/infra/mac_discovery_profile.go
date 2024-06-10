@@ -34,7 +34,7 @@ func NewMacDiscoveryProfilesClient(sessionContext utl.SessionContext, connector 
 	default:
 		return nil
 	}
-	return &MacDiscoveryProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &MacDiscoveryProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c MacDiscoveryProfileClientContext) Get(macDiscoveryProfileIdParam string) (model0.MacDiscoveryProfile, error) {

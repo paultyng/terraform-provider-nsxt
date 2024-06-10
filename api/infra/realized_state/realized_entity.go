@@ -34,7 +34,7 @@ func NewRealizedEntitiesClient(sessionContext utl.SessionContext, connector vapi
 	default:
 		return nil
 	}
-	return &RealizedEntityClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &RealizedEntityClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c RealizedEntityClientContext) List(intentPathParam string, sitePathParam *string) (model0.GenericPolicyRealizedResourceListResult, error) {

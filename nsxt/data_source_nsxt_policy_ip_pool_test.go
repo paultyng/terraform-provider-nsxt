@@ -28,6 +28,13 @@ func TestAccDataSourceNsxtPolicyIpPool_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicyIpPool_multitenancyProvider(t *testing.T) {
+	testAccDataSourceNsxtPolicyIPPoolBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccDataSourceNsxtPolicyIPPoolBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_ip_pool.test"

@@ -59,6 +59,30 @@ func TestAccResourceNsxtPolicySegment_basicImport_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicySegment_basicImport_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_segment.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySegmentCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicySegmentImportTemplate("", name, false),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicySegment_basicUpdate(t *testing.T) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
@@ -210,6 +234,13 @@ func TestAccResourceNsxtPolicySegment_noTransportZone_multitenancy(t *testing.T)
 	testAccResourceNsxtPolicySegmentNoTransportZone(t, true, func() {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
+	})
+}
+
+func TestAccResourceNsxtPolicySegment_noTransportZone_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicySegmentNoTransportZone(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
 	})
 }
 

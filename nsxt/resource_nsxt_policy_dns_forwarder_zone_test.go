@@ -40,6 +40,13 @@ func TestAccResourceNsxtPolicyDNSForwarderZone_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyDNSForwarderZone_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyDNSForwarderZoneBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyDNSForwarderZoneBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_dns_forwarder_zone.test"
 
@@ -139,6 +146,30 @@ func TestAccResourceNsxtPolicyDNSForwarderZone_importBasic_multitenancy(t *testi
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyDNSForwarderZoneMinimalistic(true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyDNSForwarderZone_importBasic_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_dns_forwarder_zone.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyDNSForwarderZoneCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyDNSForwarderZoneMinimalistic(false),
 			},
 			{
 				ResourceName:      testResourceName,

@@ -65,8 +65,12 @@ func resourceNsxtPolicyFirewallExcludeListMemberCreate(d *schema.ResourceData, m
 	doUpdate := func() error {
 		var obj model.PolicyExcludeList
 
-		client := security.NewExcludeListClient(getSessionContext(d, m), connector)
-		obj, err := client.Get()
+		context, err := getSessionContext(d, m)
+		if err != nil {
+			return err
+		}
+		client := security.NewExcludeListClient(context, connector)
+		obj, err = client.Get()
 		if isNotFoundError(err) {
 			obj = model.PolicyExcludeList{
 				Members: []string{member},
@@ -100,7 +104,11 @@ func resourceNsxtPolicyFirewallExcludeListMemberRead(d *schema.ResourceData, m i
 	connector := getPolicyConnector(m)
 	member := d.Id()
 
-	client := security.NewExcludeListClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := security.NewExcludeListClient(context, connector)
 	obj, err := client.Get()
 	if err != nil {
 		return handleReadError(d, "PolicyFirewallExcludeListMember", member, err)
@@ -119,8 +127,12 @@ func resourceNsxtPolicyFirewallExcludeListMemberDelete(d *schema.ResourceData, m
 	doUpdate := func() error {
 		var obj model.PolicyExcludeList
 
-		client := security.NewExcludeListClient(getSessionContext(d, m), connector)
-		obj, err := client.Get()
+		context, err := getSessionContext(d, m)
+		if err != nil {
+			return err
+		}
+		client := security.NewExcludeListClient(context, connector)
+		obj, err = client.Get()
 		if isNotFoundError(err) {
 			return nil
 		} else if err != nil {

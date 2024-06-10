@@ -42,7 +42,7 @@ func getPolicyPredefinedGatewayPolicySchema() map[string]*schema.Schema {
 		"rule":         getSecurityPolicyAndGatewayRulesSchema(true, false, false),
 		"default_rule": getGatewayPolicyDefaultRulesSchema(),
 		"revision":     getRevisionSchema(),
-		"context":      getContextSchema(false, false),
+		"context":      getContextSchema(false, false, false),
 	}
 }
 
@@ -293,7 +293,11 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 		return fmt.Errorf("Failed to extract domain from Gateway Policy path %s", path)
 	}
 
-	predefinedPolicy, err := getGatewayPolicyInDomain(getSessionContext(d, m), id, domain, connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	predefinedPolicy, err := getGatewayPolicyInDomain(context, id, domain, connector)
 	if err != nil {
 		return err
 	}
@@ -376,7 +380,10 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 		predefinedPolicy.Children = childRules
 	}
 
-	err = gatewayPolicyInfraPatch(getSessionContext(d, m), predefinedPolicy, domain, m)
+	if err != nil {
+		return err
+	}
+	err = gatewayPolicyInfraPatch(context, predefinedPolicy, domain, m)
 	if err != nil {
 		return handleUpdateError("Predefined Gateway Policy", id, err)
 	}
@@ -413,7 +420,11 @@ func resourceNsxtPolicyPredefinedGatewayPolicyRead(d *schema.ResourceData, m int
 	path := d.Get("path").(string)
 	domain := getDomainFromResourcePath(path)
 
-	client := domains.NewGatewayPoliciesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := domains.NewGatewayPoliciesClient(context, connector)
 	obj, err := client.Get(domain, id)
 	if err != nil {
 		return handleReadError(d, "Predefined Gateway Policy", id, err)
@@ -465,7 +476,11 @@ func resourceNsxtPolicyPredefinedGatewayPolicyDelete(d *schema.ResourceData, m i
 	path := d.Get("path").(string)
 	domain := getDomainFromResourcePath(path)
 
-	predefinedPolicy, err := getGatewayPolicyInDomain(getSessionContext(d, m), id, domain, getPolicyConnector(m))
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	predefinedPolicy, err := getGatewayPolicyInDomain(context, id, domain, getPolicyConnector(m))
 	if err != nil {
 		return err
 	}
@@ -475,7 +490,7 @@ func resourceNsxtPolicyPredefinedGatewayPolicyDelete(d *schema.ResourceData, m i
 		return fmt.Errorf("Failed to revert Predefined Gateway Policy %s: %s", id, err)
 	}
 
-	err = gatewayPolicyInfraPatch(getSessionContext(d, m), revertedPolicy, domain, m)
+	err = gatewayPolicyInfraPatch(context, revertedPolicy, domain, m)
 	if err != nil {
 		return handleUpdateError("Predefined Gateway Policy", id, err)
 	}

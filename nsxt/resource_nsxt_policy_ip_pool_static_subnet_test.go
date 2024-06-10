@@ -59,6 +59,13 @@ func TestAccResourceNsxtPolicyIPPoolStaticSubnet_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyIPPoolStaticSubnet_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyIPPoolStaticSubnetBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyIPPoolStaticSubnetBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
@@ -163,6 +170,30 @@ func TestAccResourceNsxtPolicyIPPoolStaticSubnet_import_basic_multitenancy(t *te
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNSXPolicyIPPoolStaticSubnetCreateTemplate(name, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyIPPoolStaticSubnet_import_basic_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_ip_pool_static_subnet.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXPolicyIPPoolStaticSubnetCheckDestroy(state)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyIPPoolStaticSubnetCreateTemplate(name, false),
 			},
 			{
 				ResourceName:      testResourceName,

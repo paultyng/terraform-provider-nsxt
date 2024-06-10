@@ -68,6 +68,13 @@ func TestAccResourceNsxtPolicyGatewayFloodProtectionProfile_multitenancy(t *test
 	})
 }
 
+func TestAccResourceNsxtPolicyGatewayFloodProtectionProfile_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyGatewayFloodProtectionProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyGatewayFloodProtectionProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_gateway_flood_protection_profile.test"
 	if withContext {
@@ -133,6 +140,13 @@ func TestAccResourceNsxtPolicyGatewayFloodProtectionProfile_importBasic_multiten
 	testAccResourceNsxtPolicyGatewayFloodProtectionProfileImportBasic(t, true, func() {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyGatewayFloodProtectionProfile_importBasic_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyGatewayFloodProtectionProfileImportBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
 	})
 }
 

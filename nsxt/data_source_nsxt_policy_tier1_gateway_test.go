@@ -27,6 +27,13 @@ func TestAccDataSourceNsxtPolicyTier1Gateway_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicyTier1Gateway_multitenancyProvider(t *testing.T) {
+	testAccDataSourceNsxtPolicyTier1GatewayBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccDataSourceNsxtPolicyTier1GatewayBasic(t *testing.T, withContext bool, preCheck func()) {
 	routerName := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_tier1_gateway.test"

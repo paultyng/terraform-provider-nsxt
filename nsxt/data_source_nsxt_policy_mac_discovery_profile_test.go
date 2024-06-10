@@ -64,7 +64,29 @@ func TestAccDataSourceNsxtPolicyMacDiscoveryProfile_multitenancy(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyMacDiscoveryProfileMultitenancyTemplate(name),
+				Config: testAccNsxtPolicyMacDiscoveryProfileMultitenancyTemplate(name, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataSourceNsxtPolicyMacDiscoveryProfile_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "data.nsxt_policy_mac_discovery_profile.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyMultitenancyProvider(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyMacDiscoveryProfileMultitenancyTemplate(name, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -81,8 +103,11 @@ data "nsxt_policy_mac_discovery_profile" "test" {
 }`, name)
 }
 
-func testAccNsxtPolicyMacDiscoveryProfileMultitenancyTemplate(name string) string {
-	context := testAccNsxtPolicyMultitenancyContext()
+func testAccNsxtPolicyMacDiscoveryProfileMultitenancyTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_mac_discovery_profile" "test" {
 %s

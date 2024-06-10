@@ -33,7 +33,7 @@ func resourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"arp_nd_binding_timeout": {
 				Type:         schema.TypeInt,
 				Description:  "ARP and ND cache timeout (in minutes)",
@@ -182,7 +182,11 @@ func resourceNsxtPolicyIPDiscoveryProfileCreate(d *schema.ResourceData, m interf
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating IPDiscoveryProfile with ID %s", id)
 	boolFalse := false
-	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewIpDiscoveryProfilesClient(context, connector)
 	err = client.Patch(id, obj, &boolFalse)
 	if err != nil {
 		return handleCreateError("IPDiscoveryProfile", id, err)
@@ -202,7 +206,11 @@ func resourceNsxtPolicyIPDiscoveryProfileRead(d *schema.ResourceData, m interfac
 		return fmt.Errorf("Error obtaining IPDiscoveryProfile ID")
 	}
 
-	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewIpDiscoveryProfilesClient(context, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "IPDiscoveryProfile", id, err)
@@ -232,7 +240,11 @@ func resourceNsxtPolicyIPDiscoveryProfileRead(d *schema.ResourceData, m interfac
 
 func resourceNsxtPolicyIPDiscoveryProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewIpDiscoveryProfilesClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -248,7 +260,7 @@ func resourceNsxtPolicyIPDiscoveryProfileUpdate(d *schema.ResourceData, m interf
 	// Create the resource using PATCH
 	log.Printf("[INFO] Updating IPDiscoveryProfile with ID %s", id)
 	boolFalse := false
-	err := client.Patch(id, obj, &boolFalse)
+	err = client.Patch(id, obj, &boolFalse)
 	if err != nil {
 		return handleUpdateError("IPDiscoveryProfile", id, err)
 	}
@@ -266,7 +278,11 @@ func resourceNsxtPolicyIPDiscoveryProfileDelete(d *schema.ResourceData, m interf
 	connector := getPolicyConnector(m)
 	boolFalse := false
 
-	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewIpDiscoveryProfilesClient(context, connector)
 	err = client.Delete(id, &boolFalse)
 
 	if err != nil {

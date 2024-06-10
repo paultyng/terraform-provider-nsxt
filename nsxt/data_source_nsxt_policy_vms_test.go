@@ -19,9 +19,17 @@ func TestAccDataSourceNsxtPolicyVMs_basic(t *testing.T) {
 }
 
 func TestAccDataSourceNsxtPolicyVMs_multitenancy(t *testing.T) {
-	testAccDataSourceNsxtPolicyVMsBasic(t, false, func() {
+	testAccDataSourceNsxtPolicyVMsBasic(t, true, func() {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
+		testAccEnvDefined(t, "NSXT_TEST_VM_NAME")
+	})
+}
+
+func TestAccDataSourceNsxtPolicyVMs_multitenancyProvider(t *testing.T) {
+	testAccDataSourceNsxtPolicyVMsBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
 		testAccEnvDefined(t, "NSXT_TEST_VM_NAME")
 	})
 }

@@ -166,7 +166,11 @@ func policyGatewayPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, con
 		obj.Children = policyChildren
 	}
 
-	return gatewayPolicyInfraPatch(getSessionContext(d, m), obj, domain, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	return gatewayPolicyInfraPatch(context, obj, domain, m)
 }
 
 func resourceNsxtPolicyGatewayPolicyCreate(d *schema.ResourceData, m interface{}) error {
@@ -197,7 +201,11 @@ func resourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("Error obtaining Gateway Policy ID")
 	}
 
-	obj, err := getGatewayPolicyInDomain(getSessionContext(d, m), id, d.Get("domain").(string), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	obj, err := getGatewayPolicyInDomain(context, id, d.Get("domain").(string), connector)
 	if err != nil {
 		return handleReadError(d, "Gateway Policy", id, err)
 	}
@@ -244,8 +252,12 @@ func resourceNsxtPolicyGatewayPolicyDelete(d *schema.ResourceData, m interface{}
 	}
 
 	connector := getPolicyConnector(m)
-	client := domains.NewGatewayPoliciesClient(getSessionContext(d, m), connector)
-	err := client.Delete(d.Get("domain").(string), id)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := domains.NewGatewayPoliciesClient(context, connector)
+	err = client.Delete(d.Get("domain").(string), id)
 	if err != nil {
 		return handleDeleteError("Gateway Policy", id, err)
 	}

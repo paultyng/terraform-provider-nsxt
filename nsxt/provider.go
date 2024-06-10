@@ -68,6 +68,8 @@ type nsxtClients struct {
 	Host                   string
 	PolicyEnforcementPoint string
 	PolicyGlobalManager    bool
+	ProjectID              string
+	VPCID                  string
 }
 
 // Provider for VMWare NSX-T
@@ -240,6 +242,18 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				Description: "Avoid initializing NSX connection on startup",
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_ON_DEMAND_CONNECTION", false),
+			},
+			"project_id": {
+				Type:        schema.TypeString,
+				Description: "Id of the project which the plan executes in its context.",
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_PROVIDER_PROJECT_ID", ""),
+			},
+			"vpc_id": {
+				Type:        schema.TypeString,
+				Description: "Id of the VPC which the plan executes in its context.",
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_PROVIDER_VPC_ID", ""),
 			},
 		},
 
@@ -782,6 +796,8 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clientAuthDefined := (len(clientAuthCertFile) > 0) || (len(clientAuthCert) > 0)
 	policyEnforcementPoint := d.Get("enforcement_point").(string)
 	policyGlobalManager := d.Get("global_manager").(bool)
+	projectID := d.Get("project_id").(string)
+	vpcID := d.Get("vpc_id").(string)
 	vmcInfo := getVmcAuthInfo(d)
 
 	isVMC := false
@@ -827,6 +843,8 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clients.Host = host
 	clients.PolicyEnforcementPoint = policyEnforcementPoint
 	clients.PolicyGlobalManager = policyGlobalManager
+	clients.ProjectID = projectID
+	clients.VPCID = vpcID
 
 	if onDemandConn {
 		// version init will happen on demand
@@ -1209,28 +1227,41 @@ func getGlobalPolicyEnforcementPointPath(m interface{}, sitePath *string) string
 	return fmt.Sprintf("%s/enforcement-points/%s", *sitePath, getPolicyEnforcementPoint(m))
 }
 
-func getProjectIDFromSchema(d *schema.ResourceData) string {
+func getContextDataFromSchema(d *schema.ResourceData, m interface{}) (string, string, error) {
 	ctxPtr := d.Get("context")
 	if ctxPtr != nil {
 		contexts := ctxPtr.([]interface{})
+		if (m.(nsxtClients).ProjectID != "" || m.(nsxtClients).VPCID != "") && len(contexts) > 0 {
+			return "", "", fmt.Errorf("cannot specify context in both provider level and object level")
+		}
 		for _, context := range contexts {
 			data := context.(map[string]interface{})
+			vpcID := ""
+			if data["vpc_id"] != nil {
+				vpcID = data["vpc_id"].(string)
+			}
 
-			return data["project_id"].(string)
+			return data["project_id"].(string), vpcID, nil
 		}
 	}
-	return ""
+	return m.(nsxtClients).ProjectID, m.(nsxtClients).VPCID, nil
 }
 
-func getSessionContext(d *schema.ResourceData, m interface{}) tf_api.SessionContext {
+func getSessionContext(d *schema.ResourceData, m interface{}) (tf_api.SessionContext, error) {
 	var clientType tf_api.ClientType
-	projectID := getProjectIDFromSchema(d)
+	projectID, vpcID, err := getContextDataFromSchema(d, m)
+	if err != nil {
+		return tf_api.SessionContext{}, err
+	}
 	if projectID != "" {
 		clientType = tf_api.Multitenancy
+		if vpcID != "" {
+			clientType = tf_api.VPC
+		}
 	} else if isPolicyGlobalManager(m) {
 		clientType = tf_api.Global
 	} else {
 		clientType = tf_api.Local
 	}
-	return tf_api.SessionContext{ProjectID: projectID, ClientType: clientType}
+	return tf_api.SessionContext{ProjectID: projectID, VPCID: vpcID, ClientType: clientType}, nil
 }

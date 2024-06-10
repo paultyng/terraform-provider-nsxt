@@ -34,7 +34,7 @@ func NewFloodProtectionProfileBindingsClient(sessionContext utl.SessionContext, 
 	default:
 		return nil
 	}
-	return &FloodProtectionProfileBindingMapClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &FloodProtectionProfileBindingMapClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c FloodProtectionProfileBindingMapClientContext) Get(tier1IdParam string, localeServicesIdParam string, floodProtectionProfileBindingIdParam string) (model0.FloodProtectionProfileBindingMap, error) {

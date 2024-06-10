@@ -42,6 +42,13 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyIPAddressAllocation_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyIPAddressAllocationBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyIPAddressAllocationBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_ip_address_allocation.test"
 
@@ -191,6 +198,34 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_importBasic_multitenancy(t *te
 		},
 	})
 }
+
+func TestAccResourceNsxtPolicyIPAddressAllocation_importBasic_multitenancyProvider(t *testing.T) {
+	name := accTestPolicyIPAddressAllocationUpdateAttributes["display_name"]
+	testResourceName := "nsxt_policy_ip_address_allocation.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyIPAddressAllocationCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyIPAddressAllocationTemplate(true, false),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+			{
+				Config: testAccNsxtPolicyIPAddressAllocationDependenciesTemplate(true),
+			},
+		},
+	})
+}
+
 func testAccNSXPolicyIPAddressAllocationImporterGetID(s *terraform.State) (string, error) {
 	rs, ok := s.RootModule().Resources["nsxt_policy_ip_address_allocation.test"]
 	if !ok {

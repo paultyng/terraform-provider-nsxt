@@ -284,7 +284,11 @@ func updateIdsSecurityPolicy(id string, d *schema.ResourceData, m interface{}) e
 		obj.Children = childRules
 	}
 
-	return idsPolicyInfraPatch(getSessionContext(d, m), obj, domain, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	return idsPolicyInfraPatch(context, obj, domain, m)
 }
 
 func idsPolicyInfraPatch(context utl.SessionContext, policy model.IdsSecurityPolicy, domain string, m interface{}) error {
@@ -309,7 +313,11 @@ func idsPolicyInfraPatch(context utl.SessionContext, policy model.IdsSecurityPol
 func resourceNsxtPolicyIntrusionServicePolicyCreate(d *schema.ResourceData, m interface{}) error {
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyIntrusionServicePolicyExistsPartial(getSessionContext(d, m), d.Get("domain").(string)))
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyIntrusionServicePolicyExistsPartial(context, d.Get("domain").(string)))
 	if err != nil {
 		return err
 	}
@@ -334,7 +342,11 @@ func resourceNsxtPolicyIntrusionServicePolicyRead(d *schema.ResourceData, m inte
 	if id == "" {
 		return fmt.Errorf("Error obtaining Intrusion Service Policy id")
 	}
-	client := domains.NewIntrusionServicePoliciesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := domains.NewIntrusionServicePoliciesClient(context, connector)
 	obj, err := client.Get(domainName, id)
 	if err != nil {
 		return handleReadError(d, "Intrusion Service Policy", id, err)
@@ -378,8 +390,12 @@ func resourceNsxtPolicyIntrusionServicePolicyDelete(d *schema.ResourceData, m in
 
 	connector := getPolicyConnector(m)
 
-	client := domains.NewIntrusionServicePoliciesClient(getSessionContext(d, m), connector)
-	err := client.Delete(d.Get("domain").(string), id)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := domains.NewIntrusionServicePoliciesClient(context, connector)
+	err = client.Delete(d.Get("domain").(string), id)
 
 	if err != nil {
 		return handleDeleteError("Intrusion Service Policy", id, err)

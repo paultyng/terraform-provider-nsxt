@@ -30,6 +30,13 @@ func TestAccDataSourceNsxtPolicyGatewayQosProfile_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicyGatewayQosProfile_multitenancyProvider(t *testing.T) {
+	testAccDataSourceNsxtPolicyGatewayQosProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccDataSourceNsxtPolicyGatewayQosProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_gateway_qos_profile.test"

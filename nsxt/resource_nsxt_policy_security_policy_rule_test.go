@@ -24,6 +24,13 @@ func TestAccResourceNsxtPolicySecurityPolicyRule_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicySecurityPolicyRule_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicySecurityPolicyRuleBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicySecurityPolicyRuleBasic(t *testing.T, withContext bool, preCheck func()) {
 	policyResourceName := "nsxt_policy_parent_security_policy.policy1"
 	policyName := getAccTestResourceName()
@@ -180,6 +187,34 @@ func TestAccResourceNsxtPolicySecurityPolicyRule_importBasic_multitenancy(t *tes
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicySecurityPolicyRuleDeps(true, "policyName", "true") +
+					testAccNsxtPolicySecurityPolicyRuleTemplate("test", name, "ALLOW", "IN", "IPV4", "1"),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicySecurityPolicyRule_importBasic_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_security_policy_rule.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyMultitenancyProvider(t)
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicySecurityPolicyRuleDeps(false, "policyName", "true") +
 					testAccNsxtPolicySecurityPolicyRuleTemplate("test", name, "ALLOW", "IN", "IPV4", "1"),
 			},
 			{

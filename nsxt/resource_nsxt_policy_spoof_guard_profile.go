@@ -32,7 +32,7 @@ func resourceNsxtPolicySpoofGuardProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"address_binding_allowlist": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -71,7 +71,11 @@ func resourceNsxtPolicySpoofGuardProfilePatch(d *schema.ResourceData, m interfac
 	}
 
 	log.Printf("[INFO] Patching SpoofGuardProfile with ID %s", id)
-	client := infra.NewSpoofguardProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewSpoofguardProfilesClient(context, connector)
 	return client.Patch(id, obj, nil)
 }
 
@@ -102,7 +106,11 @@ func resourceNsxtPolicySpoofGuardProfileRead(d *schema.ResourceData, m interface
 		return fmt.Errorf("Error obtaining SpoofGuardProfile ID")
 	}
 
-	client := infra.NewSpoofguardProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewSpoofguardProfilesClient(context, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "SpoofGuardProfile", id, err)
@@ -142,8 +150,12 @@ func resourceNsxtPolicySpoofGuardProfileDelete(d *schema.ResourceData, m interfa
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewSpoofguardProfilesClient(getSessionContext(d, m), connector)
-	err := client.Delete(id, nil)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewSpoofguardProfilesClient(context, connector)
+	err = client.Delete(id, nil)
 
 	if err != nil {
 		return handleDeleteError("SpoofGuardProfile", id, err)

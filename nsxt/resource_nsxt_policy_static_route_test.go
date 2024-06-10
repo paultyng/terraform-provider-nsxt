@@ -84,6 +84,13 @@ func TestAccResourceNsxtPolicyStaticRoute_basicT1_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyStaticRoute_basicT1_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyStaticRouteBasicT1(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyStaticRouteBasicT1(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updateName := getAccTestResourceName()
@@ -201,6 +208,30 @@ func TestAccResourceNsxtPolicyStaticRoute_basicT1Import_multitenancy(t *testing.
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyStaticRouteTier1CreateTemplate(name, network, true),
+			},
+			{
+				ResourceName:      testAccResourcePolicyStaticRouteName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testAccResourcePolicyStaticRouteName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyStaticRoute_basicT1Import_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	network := "14.1.1.0/24"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyStaticRouteCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyStaticRouteTier1CreateTemplate(name, network, false),
 			},
 			{
 				ResourceName:      testAccResourcePolicyStaticRouteName,

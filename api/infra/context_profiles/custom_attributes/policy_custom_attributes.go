@@ -34,7 +34,7 @@ func NewDefaultClient(sessionContext utl.SessionContext, connector vapiProtocolC
 	default:
 		return nil
 	}
-	return &PolicyCustomAttributesClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &PolicyCustomAttributesClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c PolicyCustomAttributesClientContext) Create(policyCustomAttributesParam model0.PolicyCustomAttributes, actionParam string) error {

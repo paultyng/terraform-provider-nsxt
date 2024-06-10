@@ -34,7 +34,7 @@ func NewIpv6DadProfilesClient(sessionContext utl.SessionContext, connector vapiP
 	default:
 		return nil
 	}
-	return &Ipv6DadProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &Ipv6DadProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c Ipv6DadProfileClientContext) Get(dadProfileIdParam string) (model0.Ipv6DadProfile, error) {

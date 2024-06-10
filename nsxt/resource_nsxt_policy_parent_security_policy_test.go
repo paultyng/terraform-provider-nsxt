@@ -24,6 +24,13 @@ func TestAccResourceNsxtPolicyParentSecurityPolicy_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyParentSecurityPolicy_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyParentSecurityPolicyBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyParentSecurityPolicyBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_parent_security_policy.test"
 
@@ -107,6 +114,33 @@ func TestAccResourceNsxtPolicyParentSecurityPolicy_importBasic_multitenancy(t *t
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyParentSecurityPolicyTemplate(true, name, "true", "1", "true"),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyParentSecurityPolicy_importBasic_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_parent_security_policy.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyMultitenancyProvider(t)
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyParentSecurityPolicyTemplate(false, name, "true", "1", "true"),
 			},
 			{
 				ResourceName:      testResourceName,

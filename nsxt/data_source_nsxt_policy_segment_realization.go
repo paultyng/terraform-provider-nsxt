@@ -22,7 +22,7 @@ func dataSourceNsxtPolicySegmentRealization() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"id":      getDataSourceIDSchema(),
-			"context": getContextSchema(false, false),
+			"context": getContextSchema(false, false, false),
 			"path": {
 				Type:         schema.TypeString,
 				Description:  "The path for the policy segment",
@@ -46,7 +46,10 @@ func dataSourceNsxtPolicySegmentRealization() *schema.Resource {
 func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interface{}) error {
 	// Read the realization info by the path, and wait till it is valid
 	connector := getPolicyConnector(m)
-	context := getSessionContext(d, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 	commonProviderConfig := getCommonProviderConfig(m)
 
 	// Get the realization info of this resource
@@ -91,7 +94,7 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 		MinTimeout: 1 * time.Second,
 		Delay:      1 * time.Second,
 	}
-	_, err := stateConf.WaitForState()
+	_, err = stateConf.WaitForState()
 	if err != nil {
 		return fmt.Errorf("Failed to get realization information for %s: %v", path, err)
 	}

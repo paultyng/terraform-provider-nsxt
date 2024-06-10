@@ -29,7 +29,7 @@ func NewIpBlocksClient(sessionContext utl.SessionContext, connector vapiProtocol
 	default:
 		return nil
 	}
-	return &IpAddressBlockClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &IpAddressBlockClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c IpAddressBlockClientContext) Get(ipBlockIdParam string, ignoreIpblockUsageParam *bool) (model0.IpAddressBlock, error) {

@@ -22,6 +22,13 @@ func TestAccDataSourceNsxtPolicyGatewayPolicy_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicyGatewayPolicy_multitenancyProvider(t *testing.T) {
+	testAccDataSourceNsxtPolicyGatewayPolicyBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccDataSourceNsxtPolicyGatewayPolicyBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	category := "LocalGatewayRules"

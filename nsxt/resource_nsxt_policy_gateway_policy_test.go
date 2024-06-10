@@ -24,6 +24,13 @@ func TestAccResourceNsxtPolicyGatewayPolicy_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyGatewayPolicy_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyGatewayPolicyBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyGatewayPolicyBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
@@ -242,6 +249,30 @@ func TestAccResourceNsxtPolicyGatewayPolicy_importBasic_multitenancy(t *testing.
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyGatewayPolicyBasic(name, "import", true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyGatewayPolicy_importBasic_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_gateway_policy.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGatewayPolicyCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGatewayPolicyBasic(name, "import", false),
 			},
 			{
 				ResourceName:      testResourceName,

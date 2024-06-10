@@ -27,6 +27,13 @@ func TestAccDataSourceNsxtPolicyGroup_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicyGroup_multitenancyProvider(t *testing.T) {
+	testAccDataSourceNsxtPolicyGroupBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccDataSourceNsxtPolicyGroupBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	domain := "default"

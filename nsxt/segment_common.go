@@ -267,7 +267,7 @@ func getPolicyCommonSegmentSchema(vlanRequired bool, isFixed bool) map[string]*s
 		"revision":     getRevisionSchema(),
 		"tag":          getTagsSchema(),
 		"ignore_tags":  getIgnoreTagsSchema(),
-		"context":      getContextSchema(false, false),
+		"context":      getContextSchema(false, false, false),
 		"advanced_config": {
 			Type:        schema.TypeList,
 			Description: "Advanced segment configuration",
@@ -1171,8 +1171,11 @@ func nsxtPolicySegmentDiscoveryProfileRead(d *schema.ResourceData, m interface{}
 		}
 		results = lmResults.(model.SegmentDiscoveryProfileBindingMapListResult)
 	} else {
-		client := segments.NewSegmentDiscoveryProfileBindingMapsClient(getSessionContext(d, m), connector)
-		var err error
+		context, err := getSessionContext(d, m)
+		if err != nil {
+			return err
+		}
+		client := segments.NewSegmentDiscoveryProfileBindingMapsClient(context, connector)
 		results, err = client.List(segmentID, nil, nil, nil, nil, nil, nil)
 		if err != nil {
 			return fmt.Errorf(errorMessage, segmentID, err)
@@ -1212,8 +1215,11 @@ func nsxtPolicySegmentQosProfileRead(d *schema.ResourceData, m interface{}) erro
 		}
 		results = lmResults.(model.SegmentQosProfileBindingMapListResult)
 	} else {
-		client := segments.NewSegmentQosProfileBindingMapsClient(getSessionContext(d, m), connector)
-		var err error
+		context, err := getSessionContext(d, m)
+		if err != nil {
+			return err
+		}
+		client := segments.NewSegmentQosProfileBindingMapsClient(context, connector)
 		results, err = client.List(segmentID, nil, nil, nil, nil, nil)
 		if err != nil {
 			return fmt.Errorf(errorMessage, segmentID, err)
@@ -1254,8 +1260,11 @@ func nsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m interface{})
 		}
 		results = lmResults.(model.SegmentSecurityProfileBindingMapListResult)
 	} else {
-		client := segments.NewSegmentSecurityProfileBindingMapsClient(getSessionContext(d, m), connector)
-		var err error
+		context, err := getSessionContext(d, m)
+		if err != nil {
+			return err
+		}
+		client := segments.NewSegmentSecurityProfileBindingMapsClient(context, connector)
 		results, err = client.List(segmentID, nil, nil, nil, nil, nil)
 		if err != nil {
 			return fmt.Errorf(errorMessage, segmentID, err)
@@ -1343,7 +1352,11 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 		gwPath = d.Get("connectivity_path").(string)
 	}
 
-	obj, err := nsxtPolicyGetSegment(getSessionContext(d, m), connector, id, gwPath, isFixed)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	obj, err := nsxtPolicyGetSegment(context, connector, id, gwPath, isFixed)
 
 	if err != nil {
 		return handleReadError(d, "Segment", id, err)
@@ -1451,17 +1464,21 @@ func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool,
 		gwPath = d.Get("connectivity_path").(string)
 	}
 
-	id, err := getOrGenerateID2(d, m, resourceNsxtPolicySegmentExists(getSessionContext(d, m), gwPath, isFixed))
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicySegmentExists(context, gwPath, isFixed))
 	if err != nil {
 		return err
 	}
 
-	obj, err := policySegmentResourceToInfraStruct(getSessionContext(d, m), id, d, isVlan, isFixed)
+	obj, err := policySegmentResourceToInfraStruct(context, id, d, isVlan, isFixed)
 	if err != nil {
 		return err
 	}
 
-	err = policyInfraPatch(getSessionContext(d, m), obj, getPolicyConnector(m), false)
+	err = policyInfraPatch(context, obj, getPolicyConnector(m), false)
 	if err != nil {
 		return handleCreateError("Segment", id, err)
 	}
@@ -1479,12 +1496,16 @@ func nsxtPolicySegmentUpdate(d *schema.ResourceData, m interface{}, isVlan bool,
 		return fmt.Errorf("Error obtaining Segment ID")
 	}
 
-	obj, err := policySegmentResourceToInfraStruct(getSessionContext(d, m), id, d, isVlan, isFixed)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	obj, err := policySegmentResourceToInfraStruct(context, id, d, isVlan, isFixed)
 	if err != nil {
 		return err
 	}
 
-	err = policyInfraPatch(getSessionContext(d, m), obj, getPolicyConnector(m), true)
+	err = policyInfraPatch(context, obj, getPolicyConnector(m), true)
 	if err != nil {
 		return handleCreateError("Segment", id, err)
 	}
@@ -1499,6 +1520,10 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}, isFixed bool
 	}
 
 	connector := getPolicyConnector(m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 
 	// During bulk destroy, VMs might be destroyed before segments, but
 	// VIF release is not yet propagated to NSX. NSX will reply with
@@ -1521,7 +1546,7 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}, isFixed bool
 				numOfPorts = len(gmPorts.Results)
 				ports = gmPorts
 			} else {
-				portsClient := segments.NewPortsClient(getSessionContext(d, m), connector)
+				portsClient := segments.NewPortsClient(context, connector)
 				lmPorts, err := portsClient.List(id, nil, nil, nil, nil, nil, nil)
 				if err != nil {
 					return lmPorts, "error", logAPIError("Error listing segment ports", err)
@@ -1588,7 +1613,7 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}, isFixed bool
 	}
 
 	log.Printf("[DEBUG] Using H-API to delete segment with ID %s", id)
-	err := policyInfraPatch(getSessionContext(d, m), infraObj, getPolicyConnector(m), false)
+	err = policyInfraPatch(context, infraObj, getPolicyConnector(m), false)
 	if err != nil {
 		return handleDeleteError("Segment", id, err)
 	}

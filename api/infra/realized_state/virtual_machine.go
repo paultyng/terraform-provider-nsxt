@@ -29,7 +29,7 @@ func NewVirtualMachinesClient(sessionContext utl.SessionContext, connector vapiP
 	default:
 		return nil
 	}
-	return &VirtualMachineClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &VirtualMachineClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c VirtualMachineClientContext) List(cursorParam *string, enforcementPointPathParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.VirtualMachineListResult, error) {

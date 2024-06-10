@@ -57,6 +57,13 @@ func TestAccResourceNsxtPolicyGatewayDNSForwarder_tier1_multitenancy(t *testing.
 	})
 }
 
+func TestAccResourceNsxtPolicyGatewayDNSForwarder_tier1_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyGatewayDNSForwarder(t, false, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyGatewayDNSForwarder(t *testing.T, isT0 bool, withContext bool, preCheck func()) {
 	resourceName := testAccResourcePolicyGatewayDNSForwarderName
 	resource.Test(t, resource.TestCase{
@@ -145,6 +152,27 @@ func TestAccResourceNsxtPolicyGatewayDNSForwarder_importTier1_multitenancy(t *te
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyGatewayDNSForwarderMinimalistic(false, true),
+			},
+			{
+				ResourceName:      testAccResourcePolicyGatewayDNSForwarderName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccNSXPolicyGatewayDNSForwarderImporterGetID,
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyGatewayDNSForwarder_importTier1_multitenancyProvider(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGatewayDNSForwarderCheckDestroy(state, accTestPolicyGatewayDNSForwarderCreateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGatewayDNSForwarderMinimalistic(false, false),
 			},
 			{
 				ResourceName:      testAccResourcePolicyGatewayDNSForwarderName,

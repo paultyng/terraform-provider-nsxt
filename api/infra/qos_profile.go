@@ -34,7 +34,7 @@ func NewQosProfilesClient(sessionContext utl.SessionContext, connector vapiProto
 	default:
 		return nil
 	}
-	return &QosProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &QosProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c QosProfileClientContext) Get(qosProfileIdParam string) (model0.QosProfile, error) {

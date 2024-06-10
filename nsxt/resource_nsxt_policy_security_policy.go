@@ -82,7 +82,11 @@ func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, id
 	}
 
 	log.Printf("[INFO] Using selective H-API for policy with ID %s", id)
-	return securityPolicyInfraPatch(getSessionContext(d, m), obj, domain, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	return securityPolicyInfraPatch(context, obj, domain, m)
 }
 
 func resourceNsxtPolicySecurityPolicyCreate(d *schema.ResourceData, m interface{}) error {
@@ -105,8 +109,12 @@ func resourceNsxtPolicySecurityPolicyDelete(d *schema.ResourceData, m interface{
 
 	connector := getPolicyConnector(m)
 
-	client := domains.NewSecurityPoliciesClient(getSessionContext(d, m), connector)
-	err := client.Delete(d.Get("domain").(string), id)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := domains.NewSecurityPoliciesClient(context, connector)
+	err = client.Delete(d.Get("domain").(string), id)
 
 	if err != nil {
 		return handleDeleteError("Security Policy", id, err)

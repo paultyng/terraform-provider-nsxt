@@ -34,7 +34,7 @@ func NewRulesClient(sessionContext utl.SessionContext, connector vapiProtocolCli
 	default:
 		return nil
 	}
-	return &RuleClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &RuleClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c RuleClientContext) Get(domainIdParam string, securityPolicyIdParam string, ruleIdParam string) (model0.Rule, error) {

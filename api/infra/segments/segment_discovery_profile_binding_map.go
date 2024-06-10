@@ -29,7 +29,7 @@ func NewSegmentDiscoveryProfileBindingMapsClient(sessionContext utl.SessionConte
 	default:
 		return nil
 	}
-	return &SegmentDiscoveryProfileBindingMapClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &SegmentDiscoveryProfileBindingMapClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c SegmentDiscoveryProfileBindingMapClientContext) Get(infraSegmentIdParam string, segmentDiscoveryProfileBindingMapIdParam string) (model0.SegmentDiscoveryProfileBindingMap, error) {

@@ -30,6 +30,13 @@ func TestAccResourceNsxtPolicyContextProfile_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyContextProfile_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyContextProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyContextProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
@@ -154,6 +161,31 @@ func TestAccResourceNsxtPolicyContextProfile_importBasic_multitenancy(t *testing
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyContextProfileTemplate(name, attributes, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyContextProfile_importBasic_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_context_profile.test"
+	attributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(testSystemDomainName)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyContextProfileCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyContextProfileTemplate(name, attributes, false),
 			},
 			{
 				ResourceName:      testResourceName,

@@ -36,6 +36,13 @@ func TestAccResourceNsxtPolicySpoofGuardProfile_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicySpoofGuardProfile_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicySpoofGuardProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicySpoofGuardProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_spoof_guard_profile.test"
 
@@ -125,6 +132,30 @@ func TestAccResourceNsxtPolicySpoofGuardProfile_importBasic_multitenancy(t *test
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicySpoofGuardProfileMinimalistic(true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicySpoofGuardProfile_importBasic_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_spoof_guard_profile.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySpoofGuardProfileCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicySpoofGuardProfileMinimalistic(false),
 			},
 			{
 				ResourceName:      testResourceName,

@@ -30,6 +30,13 @@ func TestAccResourceNsxtPolicyContextProfileCustomAttribute_multitenancy(t *test
 	})
 }
 
+func TestAccResourceNsxtPolicyContextProfileCustomAttribute_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyContextProfileCustomAttributeBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyContextProfileCustomAttributeBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_context_profile_custom_attribute.test"
 

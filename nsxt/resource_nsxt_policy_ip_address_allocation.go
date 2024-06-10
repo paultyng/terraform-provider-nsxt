@@ -39,7 +39,7 @@ func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"pool_path":    getPolicyPathSchema(true, true, "The path of the IP Pool for this allocation"),
 			"allocation_ip": {
 				Type:         schema.TypeString,
@@ -77,8 +77,11 @@ func resourceNsxtPolicyIPAddressAllocationExists(sessionContext utl.SessionConte
 
 func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	sessionContext := getSessionContext(d, m)
-	client := ippools.NewIpAllocationsClient(sessionContext, connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := ippools.NewIpAllocationsClient(context, connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -92,7 +95,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 		id = uuid.String()
 	}
 
-	exists, err := resourceNsxtPolicyIPAddressAllocationExists(sessionContext, poolID, id, connector)
+	exists, err := resourceNsxtPolicyIPAddressAllocationExists(context, poolID, id, connector)
 	if err != nil {
 		return err
 	}
@@ -130,7 +133,11 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 
 func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpAllocationsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := ippools.NewIpAllocationsClient(context, connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -182,7 +189,11 @@ func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interfa
 
 func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpAllocationsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := ippools.NewIpAllocationsClient(context, connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -206,7 +217,7 @@ func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m inter
 
 	// Update the resource using PATCH
 	log.Printf("[INFO] Updating IPAddressAllocation with ID %s", id)
-	err := client.Patch(poolID, id, obj)
+	err = client.Patch(poolID, id, obj)
 	if err != nil {
 		return handleUpdateError("IPAddressAllocation", id, err)
 	}
@@ -216,7 +227,11 @@ func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m inter
 
 func resourceNsxtPolicyIPAddressAllocationDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpAllocationsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := ippools.NewIpAllocationsClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -228,7 +243,7 @@ func resourceNsxtPolicyIPAddressAllocationDelete(d *schema.ResourceData, m inter
 
 	poolID := getPolicyIDFromPath(d.Get("pool_path").(string))
 
-	err := client.Delete(poolID, id)
+	err = client.Delete(poolID, id)
 	if err != nil {
 		return handleDeleteError("IPAddressAllocation", id, err)
 	}
@@ -260,7 +275,11 @@ func resourceNsxtPolicyIPAddressAllocationImport(d *schema.ResourceData, m inter
 
 	poolID := s[0]
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return nil, err
+	}
+	client := infra.NewIpPoolsClient(context, connector)
 
 	pool, err := client.Get(poolID)
 	if err != nil {

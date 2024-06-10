@@ -32,7 +32,7 @@ func resourceNsxtPolicyIPPool() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"realized_id": {
 				Type:        schema.TypeString,
 				Description: "The ID of the realized resource",
@@ -59,7 +59,11 @@ func resourceNsxtPolicyIPPoolExists(sessionContext utl.SessionContext, id string
 
 func resourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewIpPoolsClient(context, connector)
 
 	id := d.Id()
 	if id == "" {
@@ -89,7 +93,11 @@ func resourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtPolicyIPPoolCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewIpPoolsClient(context, connector)
 
 	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyIPPoolExists)
 	if err != nil {
@@ -120,7 +128,11 @@ func resourceNsxtPolicyIPPoolCreate(d *schema.ResourceData, m interface{}) error
 
 func resourceNsxtPolicyIPPoolUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewIpPoolsClient(context, connector)
 
 	id := d.Id()
 	if id == "" {
@@ -139,7 +151,7 @@ func resourceNsxtPolicyIPPoolUpdate(d *schema.ResourceData, m interface{}) error
 	}
 
 	log.Printf("[INFO] Updating IP Pool with ID %s", id)
-	err := client.Patch(id, obj)
+	err = client.Patch(id, obj)
 	if err != nil {
 		return handleUpdateError("IP Pool", id, err)
 	}
@@ -151,7 +163,11 @@ func resourceNsxtPolicyIPPoolUpdate(d *schema.ResourceData, m interface{}) error
 
 func resourceNsxtPolicyIPPoolDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewIpPoolsClient(context, connector)
 
 	id := d.Id()
 	if id == "" {
@@ -159,7 +175,7 @@ func resourceNsxtPolicyIPPoolDelete(d *schema.ResourceData, m interface{}) error
 	}
 
 	log.Printf("[INFO] Deleting IP Pool with ID %s", id)
-	err := client.Delete(id)
+	err = client.Delete(id)
 	if err != nil {
 		return handleDeleteError("IP Pool", id, err)
 	}

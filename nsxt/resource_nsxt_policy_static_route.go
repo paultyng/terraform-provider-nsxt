@@ -37,7 +37,7 @@ func resourceNsxtPolicyStaticRoute() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"gateway_path": getPolicyGatewayPathSchema(),
 			"network": {
 				Type:         schema.TypeString,
@@ -114,7 +114,10 @@ func resourceNsxtPolicyStaticRouteCreate(d *schema.ResourceData, m interface{}) 
 	if gwID == "" {
 		return fmt.Errorf("gateway_path is not a valid")
 	}
-	context := getSessionContext(d, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 	if isT0 && context.ClientType == utl.Multitenancy {
 		return handleMultitenancyTier0Error()
 	}
@@ -171,7 +174,10 @@ func resourceNsxtPolicyStaticRouteCreate(d *schema.ResourceData, m interface{}) 
 	}
 
 	log.Printf("[INFO] Creating Static Route with ID %s", id)
-	err := patchNsxtPolicyStaticRoute(getSessionContext(d, m), connector, gwID, routeStruct, isT0)
+	if err != nil {
+		return err
+	}
+	err = patchNsxtPolicyStaticRoute(context, connector, gwID, routeStruct, isT0)
 	if err != nil {
 		return handleCreateError("Static Route", id, err)
 	}
@@ -195,7 +201,10 @@ func resourceNsxtPolicyStaticRouteRead(d *schema.ResourceData, m interface{}) er
 	if gwID == "" {
 		return fmt.Errorf("gateway_path is not a valid")
 	}
-	context := getSessionContext(d, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 	if isT0 && context.ClientType == utl.Multitenancy {
 		return handleMultitenancyTier0Error()
 	}
@@ -253,7 +262,10 @@ func resourceNsxtPolicyStaticRouteUpdate(d *schema.ResourceData, m interface{}) 
 	if gwID == "" {
 		return fmt.Errorf("gateway_path is not valid")
 	}
-	context := getSessionContext(d, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 	if isT0 && context.ClientType == utl.Multitenancy {
 		return handleMultitenancyTier0Error()
 	}
@@ -297,7 +309,7 @@ func resourceNsxtPolicyStaticRouteUpdate(d *schema.ResourceData, m interface{}) 
 	}
 
 	log.Printf("[INFO] Updating Static Route with ID %s", id)
-	err := patchNsxtPolicyStaticRoute(context, connector, gwID, routeStruct, isT0)
+	err = patchNsxtPolicyStaticRoute(context, connector, gwID, routeStruct, isT0)
 	if err != nil {
 		return handleUpdateError("Static Route", id, err)
 	}
@@ -319,12 +331,15 @@ func resourceNsxtPolicyStaticRouteDelete(d *schema.ResourceData, m interface{}) 
 	if gwID == "" {
 		return fmt.Errorf("gateway_path is not valid")
 	}
-	context := getSessionContext(d, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 	if isT0 && context.ClientType == utl.Multitenancy {
 		return handleMultitenancyTier0Error()
 	}
 
-	err := deleteNsxtPolicyStaticRoute(context, getPolicyConnector(m), gwID, isT0, id)
+	err = deleteNsxtPolicyStaticRoute(context, getPolicyConnector(m), gwID, isT0, id)
 	if err != nil {
 		return handleDeleteError("Static Route", id, err)
 	}
@@ -352,13 +367,17 @@ func resourceNsxtPolicyStaticRouteImport(d *schema.ResourceData, m interface{}) 
 
 	gwID := s[0]
 	connector := getPolicyConnector(m)
-	t0Client := infra.NewTier0sClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return nil, err
+	}
+	t0Client := infra.NewTier0sClient(context, connector)
 	t0gw, err := t0Client.Get(gwID)
 	if err != nil {
 		if !isNotFoundError(err) {
 			return nil, err
 		}
-		t1Client := infra.NewTier1sClient(getSessionContext(d, m), connector)
+		t1Client := infra.NewTier1sClient(context, connector)
 		t1gw, err := t1Client.Get(gwID)
 		if err != nil {
 			return nil, err

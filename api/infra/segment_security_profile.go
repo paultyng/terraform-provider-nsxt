@@ -34,7 +34,7 @@ func NewSegmentSecurityProfilesClient(sessionContext utl.SessionContext, connect
 	default:
 		return nil
 	}
-	return &SegmentSecurityProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &SegmentSecurityProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c SegmentSecurityProfileClientContext) Get(segmentSecurityProfileIdParam string) (model0.SegmentSecurityProfile, error) {

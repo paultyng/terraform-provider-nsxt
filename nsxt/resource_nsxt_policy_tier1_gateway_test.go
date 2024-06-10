@@ -24,6 +24,13 @@ func TestAccResourceNsxtPolicyTier1Gateway_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyTier1Gateway_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyTier1GatewayBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyTier1GatewayBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updateName := getAccTestResourceName()
@@ -483,6 +490,31 @@ func TestAccResourceNsxtPolicyTier1Gateway_importBasic_multitenancy(t *testing.T
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyTier1ImportTemplate(name, failoverMode, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyTier1Gateway_importBasic_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_tier1_gateway.test"
+	failoverMode := "PREEMPTIVE"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier1CheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTier1ImportTemplate(name, failoverMode, false),
 			},
 			{
 				ResourceName:      testResourceName,

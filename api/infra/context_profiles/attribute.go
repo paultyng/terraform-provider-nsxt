@@ -34,7 +34,7 @@ func NewAttributesClient(sessionContext utl.SessionContext, connector vapiProtoc
 	default:
 		return nil
 	}
-	return &AttributeClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &AttributeClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c AttributeClientContext) List(attributeKeyParam *string, attributeSourceParam *string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model0.PolicyContextProfileListResult, error) {

@@ -29,7 +29,7 @@ func NewSegmentQosProfileBindingMapsClient(sessionContext utl.SessionContext, co
 	default:
 		return nil
 	}
-	return &SegmentQosProfileBindingMapClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &SegmentQosProfileBindingMapClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c SegmentQosProfileBindingMapClientContext) Get(segmentIdParam string, segmentQosProfileBindingMapIdParam string) (model0.SegmentQosProfileBindingMap, error) {

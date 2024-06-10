@@ -52,6 +52,13 @@ func TestAccDataSourceNsxtPolicySegmentRealization_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicySegmentRealization_multitenancyProvider(t *testing.T) {
+	testAccDataSourceNsxtPolicySegmentRealization(t, false, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccNsxtPolicySegmentRealizationTemplate(vlan, withContext bool) string {
 	resource := "nsxt_policy_segment"
 	tz := getOverlayTransportZoneName()

@@ -35,7 +35,7 @@ func NewDhcpStaticBindingConfigsClient(sessionContext utl.SessionContext, connec
 	default:
 		return nil
 	}
-	return &StructValueClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &StructValueClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c StructValueClientContext) Get(tier1IdParam string, segmentIdParam string, bindingIdParam string) (*model0.StructValue, error) {

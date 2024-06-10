@@ -29,7 +29,7 @@ func NewIpAllocationsClient(sessionContext utl.SessionContext, connector vapiPro
 	default:
 		return nil
 	}
-	return &IpAddressAllocationClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &IpAddressAllocationClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c IpAddressAllocationClientContext) Get(ipPoolIdParam string, ipAllocationIdParam string) (model0.IpAddressAllocation, error) {

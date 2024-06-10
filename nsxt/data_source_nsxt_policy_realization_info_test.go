@@ -25,6 +25,13 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_tier1DataSource_multitenancy(t *
 	})
 }
 
+func TestAccDataSourceNsxtPolicyRealizationInfo_tier1DataSource_multitenancyProvider(t *testing.T) {
+	testAccDataSourceNsxtPolicyRealizationInfoTier1DataSource(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccDataSourceNsxtPolicyRealizationInfoTier1DataSource(t *testing.T, withContext bool, preCheck func()) {
 	resourceDataType := "nsxt_policy_tier1_gateway"
 	resourceName := getAccTestDataSourceName()
@@ -114,6 +121,14 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_tier1Resource_multitenancy(t *te
 		testAccPreCheck(t)
 		testAccNSXVersion(t, "3.0.0")
 		testAccOnlyMultitenancy(t)
+	})
+}
+
+func TestAccDataSourceNsxtPolicyRealizationInfo_tier1Resource_multitenancyProvider(t *testing.T) {
+	testAccDataSourceNsxtPolicyRealizationInfoTier1Resource(t, false, func() {
+		testAccPreCheck(t)
+		testAccNSXVersion(t, "3.0.0")
+		testAccOnlyMultitenancyProvider(t)
 	})
 }
 

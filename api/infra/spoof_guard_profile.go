@@ -34,7 +34,7 @@ func NewSpoofguardProfilesClient(sessionContext utl.SessionContext, connector va
 	default:
 		return nil
 	}
-	return &SpoofGuardProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &SpoofGuardProfileClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c SpoofGuardProfileClientContext) Get(spoofguardProfileIdParam string) (model0.SpoofGuardProfile, error) {

@@ -34,7 +34,11 @@ func getOrGenerateID2(d *schema.ResourceData, m interface{}, presenceChecker fun
 		return newUUID(), nil
 	}
 
-	exists, err := presenceChecker(getSessionContext(d, m), id, connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return "", err
+	}
+	exists, err := presenceChecker(context, id, connector)
 	if err != nil {
 		return "", err
 	}
@@ -310,11 +314,12 @@ func nsxtPolicyPathResourceImporterHelper(d *schema.ResourceData, m interface{})
 			}
 			// pathSegs[2] should contain the organization. Once we support multiple organization, it should be
 			// assigned into the context as well
-			contexts := make([]interface{}, 1)
 			ctxMap := make(map[string]interface{})
 			ctxMap["project_id"] = pathSegs[4]
-			contexts[0] = ctxMap
-			d.Set("context", contexts)
+			if pathSegs[5] == "vpcs" {
+				ctxMap["vpc_id"] = pathSegs[6]
+			}
+			d.Set("context", []interface{}{ctxMap})
 			d.SetId(pathSegs[len(pathSegs)-1])
 		}
 		return []*schema.ResourceData{d}, nil

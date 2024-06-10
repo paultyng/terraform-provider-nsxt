@@ -33,7 +33,7 @@ func resourceNsxtPolicyDNSForwarderZone() *schema.Resource {
 			"description":      getDescriptionSchema(),
 			"revision":         getRevisionSchema(),
 			"tag":              getTagsSchema(),
-			"context":          getContextSchema(false, false),
+			"context":          getContextSchema(false, false, false),
 			"dns_domain_names": getDomainNamesSchema(),
 			"source_ip": {
 				Type:         schema.TypeString,
@@ -93,7 +93,11 @@ func policyDNSForwarderZonePatch(id string, d *schema.ResourceData, m interface{
 	}
 
 	// Create the resource using PATCH
-	client := infra.NewDnsForwarderZonesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewDnsForwarderZonesClient(context, connector)
 	return client.Patch(id, obj)
 }
 
@@ -127,7 +131,11 @@ func resourceNsxtPolicyDNSForwarderZoneRead(d *schema.ResourceData, m interface{
 		return fmt.Errorf("Error obtaining Dns Forwarder Zone ID")
 	}
 
-	client := infra.NewDnsForwarderZonesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewDnsForwarderZonesClient(context, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Dns Forwarder Zone", id, err)
@@ -171,8 +179,12 @@ func resourceNsxtPolicyDNSForwarderZoneDelete(d *schema.ResourceData, m interfac
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewDnsForwarderZonesClient(getSessionContext(d, m), connector)
-	err := client.Delete(id)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewDnsForwarderZonesClient(context, connector)
+	err = client.Delete(id)
 
 	if err != nil {
 		return handleDeleteError("Dns Forwarder Zone", id, err)

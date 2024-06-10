@@ -30,7 +30,7 @@ func NewIpSubnetsClient(sessionContext utl.SessionContext, connector vapiProtoco
 	default:
 		return nil
 	}
-	return &StructValueClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &StructValueClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c StructValueClientContext) Get(ipPoolIdParam string, ipSubnetIdParam string) (*model0.StructValue, error) {

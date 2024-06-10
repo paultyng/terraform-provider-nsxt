@@ -63,6 +63,13 @@ func TestAccResourceNsxtPolicyIPBlock_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyIPBlock_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyIPBlockBasic(t, false, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyIPBlockBasic(t *testing.T, withContext bool, withVisibility bool, preCheck func()) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_ip_block.test"
@@ -165,6 +172,30 @@ func TestAccResourceNsxtPolicyIPBlock_importBasic_multitenancy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNSXPolicyIPBlockCreateMinimalTemplate(name, "192.191.1.0/24", true, false),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyIPBlock_importBasic_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_ip_block.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXPolicyIPBlockCheckDestroy(state)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyIPBlockCreateMinimalTemplate(name, "192.191.1.0/24", false, false),
 			},
 			{
 				ResourceName:      testResourceName,

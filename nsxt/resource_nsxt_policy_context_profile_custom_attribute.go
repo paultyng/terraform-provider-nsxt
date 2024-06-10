@@ -42,7 +42,7 @@ func resourceNsxtPolicyContextProfileCustomAttribute() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"context": getContextSchema(false, false),
+			"context": getContextSchema(false, false, false),
 			"key": {
 				Type:         schema.TypeString,
 				Description:  "Key for attribute",
@@ -103,7 +103,11 @@ func resourceNsxtPolicyContextProfileCustomAttributeRead(d *schema.ResourceData,
 	log.Printf("[INFO] Reading ContextProfileCustomAttribute with ID %s", d.Id())
 
 	connector := getPolicyConnector(m)
-	exists, err := resourceNsxtPolicyContextProfileCustomAttributeExists(getSessionContext(d, m), id, connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	exists, err := resourceNsxtPolicyContextProfileCustomAttributeExists(context, id, connector)
 	if err != nil {
 		return err
 	}
@@ -132,7 +136,11 @@ func resourceNsxtPolicyContextProfileCustomAttributeCreate(d *schema.ResourceDat
 	}
 
 	// PATCH the resource
-	client := infra.NewDefaultClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewDefaultClient(context, connector)
 	err = client.Create(obj, "add")
 	if err != nil {
 		return handleCreateError("ContextProfileCustomAttribute", attribute, err)
@@ -165,7 +173,11 @@ func resourceNsxtPolicyContextProfileCustomAttributeDelete(d *schema.ResourceDat
 	}
 
 	// PATCH the resource
-	client := infra.NewDefaultClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewDefaultClient(context, connector)
 	err = client.Create(obj, "remove")
 
 	if err != nil {

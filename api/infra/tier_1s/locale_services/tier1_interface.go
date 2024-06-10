@@ -34,7 +34,7 @@ func NewInterfacesClient(sessionContext utl.SessionContext, connector vapiProtoc
 	default:
 		return nil
 	}
-	return &Tier1InterfaceClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &Tier1InterfaceClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c Tier1InterfaceClientContext) Get(tier1IdParam string, localeServicesIdParam string, interfaceIdParam string) (model0.Tier1Interface, error) {

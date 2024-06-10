@@ -57,7 +57,7 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"gateway_path": getPolicyGatewayPathSchema(),
 			"action": {
 				Type:         schema.TypeString,
@@ -168,14 +168,17 @@ func resourceNsxtPolicyNATRuleDelete(d *schema.ResourceData, m interface{}) erro
 	if gwID == "" {
 		return fmt.Errorf("gateway_path is not valid")
 	}
-	context := getSessionContext(d, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 	if isT0 && context.ClientType == utl.Multitenancy {
 		return handleMultitenancyTier0Error()
 	}
 
 	action := d.Get("action").(string)
 	natType := getNatTypeByAction(action)
-	err := deleteNsxtPolicyNATRule(context, getPolicyConnector(m), gwID, isT0, natType, id)
+	err = deleteNsxtPolicyNATRule(context, getPolicyConnector(m), gwID, isT0, natType, id)
 	if err != nil {
 		return handleDeleteError("NAT Rule", id, err)
 	}
@@ -261,7 +264,10 @@ func resourceNsxtPolicyNATRuleRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("gateway_path is not valid")
 	}
 
-	context := getSessionContext(d, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 	if isT0 && context.ClientType == utl.Multitenancy {
 		return handleMultitenancyTier0Error()
 	}
@@ -315,7 +321,10 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 		return fmt.Errorf("gateway_path is not valid")
 	}
 
-	context := getSessionContext(d, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 	if isT0 && context.ClientType == utl.Multitenancy {
 		return handleMultitenancyTier0Error()
 	}
@@ -376,7 +385,10 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 
 	log.Printf("[INFO] Creating NAT Rule with ID %s", id)
 
-	err := patchNsxtPolicyNATRule(getSessionContext(d, m), connector, gwID, ruleStruct, isT0)
+	if err != nil {
+		return err
+	}
+	err = patchNsxtPolicyNATRule(context, connector, gwID, ruleStruct, isT0)
 	if err != nil {
 		return handleCreateError("NAT Rule", id, err)
 	}
@@ -400,7 +412,10 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 	if gwID == "" {
 		return fmt.Errorf("gateway_path is not valid")
 	}
-	context := getSessionContext(d, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 	if isT0 && context.ClientType == utl.Multitenancy {
 		return handleMultitenancyTier0Error()
 	}
@@ -449,7 +464,7 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	log.Printf("[INFO] Updating NAT Rule with ID %s", id)
-	err := patchNsxtPolicyNATRule(context, connector, gwID, ruleStruct, isT0)
+	err = patchNsxtPolicyNATRule(context, connector, gwID, ruleStruct, isT0)
 	if err != nil {
 		return handleUpdateError("NAT Rule", id, err)
 	}
@@ -496,13 +511,17 @@ func resourceNsxtPolicyNATRuleImport(d *schema.ResourceData, m interface{}) ([]*
 
 	gwID := s[0]
 	connector := getPolicyConnector(m)
-	t0Client := infra.NewTier0sClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return nil, err
+	}
+	t0Client := infra.NewTier0sClient(context, connector)
 	t0gw, err := t0Client.Get(gwID)
 	if err != nil {
 		if !isNotFoundError(err) {
 			return nil, err
 		}
-		t1Client := infra.NewTier1sClient(getSessionContext(d, m), connector)
+		t1Client := infra.NewTier1sClient(context, connector)
 		t1gw, err := t1Client.Get(gwID)
 		if err != nil {
 			return nil, err

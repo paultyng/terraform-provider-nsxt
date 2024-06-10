@@ -70,6 +70,13 @@ func TestAccResourceNsxtPolicyDistributedFloodProtectionProfile_multitenancy(t *
 	})
 }
 
+func TestAccResourceNsxtPolicyDistributedFloodProtectionProfile_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyDistributedFloodProtectionProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyDistributedFloodProtectionProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_distributed_flood_protection_profile.test"
 	if withContext {
@@ -137,6 +144,13 @@ func TestAccResourceNsxtPolicyDistributedFloodProtectionProfile_importBasic_mult
 	testAccResourceNsxtPolicyDistributedFloodProtectionProfileImportBasic(t, true, func() {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyDistributedFloodProtectionProfile_importBasic_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyDistributedFloodProtectionProfileImportBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
 	})
 }
 

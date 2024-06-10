@@ -30,7 +30,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBinding() *schema.Resour
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"profile_path": {
 				Type:         schema.TypeString,
 				Description:  "The path of the flood protection profile",
@@ -55,7 +55,11 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBinding() *schema.Resour
 
 func resourceNsxtPolicyDistributedFloodProtectionProfileBindingPatch(d *schema.ResourceData, m interface{}, id string, isCreate bool) error {
 	connector := getPolicyConnector(m)
-	bindingClient := groups.NewFirewallFloodProtectionProfileBindingMapsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	bindingClient := groups.NewFirewallFloodProtectionProfileBindingMapsClient(context, connector)
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
@@ -105,7 +109,11 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingCreate(d *schema.
 	}
 
 	groupPath := d.Get("group_path").(string)
-	exist, err := resourceNsxtPolicyDistributedFloodProtectionProfileBindingExists(getSessionContext(d, m), getPolicyConnector(m), groupPath, id)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	exist, err := resourceNsxtPolicyDistributedFloodProtectionProfileBindingExists(context, getPolicyConnector(m), groupPath, id)
 	if err != nil {
 		return err
 	}
@@ -131,7 +139,11 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingRead(d *schema.Re
 	}
 
 	connector := getPolicyConnector(m)
-	bindingClient := groups.NewFirewallFloodProtectionProfileBindingMapsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	bindingClient := groups.NewFirewallFloodProtectionProfileBindingMapsClient(context, connector)
 
 	groupPath := d.Get("group_path").(string)
 	domain := getDomainFromResourcePath(groupPath)
@@ -168,13 +180,17 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingDelete(d *schema.
 	}
 
 	connector := getPolicyConnector(m)
-	bindingClient := groups.NewFirewallFloodProtectionProfileBindingMapsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	bindingClient := groups.NewFirewallFloodProtectionProfileBindingMapsClient(context, connector)
 
 	groupPath := d.Get("group_path").(string)
 	domain := getDomainFromResourcePath(groupPath)
 	groupID := getPolicyIDFromPath(groupPath)
 
-	err := bindingClient.Delete(domain, groupID, id)
+	err = bindingClient.Delete(domain, groupID, id)
 	if err != nil {
 		return handleDeleteError("FloodProtectionProfileBinding", id, err)
 	}

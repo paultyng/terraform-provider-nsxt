@@ -35,7 +35,40 @@ func TestAccDataSourceNsxtPolicyVPC_basic_multitenancy(t *testing.T) {
 						t.Error(err)
 					}
 				},
-				Config: testAccNsxtPolicyVPCReadTemplate(name),
+				Config: testAccNsxtPolicyVPCReadTemplate(name, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", name),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "short_id"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataSourceNsxtPolicyVPC_basic_multitenancyProvider(t *testing.T) {
+	name := getAccTestDataSourceName()
+	testResourceName := "data.nsxt_policy_vpc.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccOnlyMultitenancyProvider(t)
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "4.1.2")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccDataSourceNsxtPolicyVPCDeleteByName(name)
+		},
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					if err := testAccDataSourceNsxtPolicyVPCCreate(name); err != nil {
+						t.Error(err)
+					}
+				},
+				Config: testAccNsxtPolicyVPCReadTemplate(name, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", name),
@@ -113,8 +146,11 @@ func testAccDataSourceNsxtPolicyVPCDeleteByName(name string) error {
 	return fmt.Errorf("error while deleting VPC '%s': resource not found", name)
 }
 
-func testAccNsxtPolicyVPCReadTemplate(name string) string {
-	context := testAccNsxtPolicyMultitenancyContext()
+func testAccNsxtPolicyVPCReadTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 data "nsxt_policy_ip_block" "test" {
 %s

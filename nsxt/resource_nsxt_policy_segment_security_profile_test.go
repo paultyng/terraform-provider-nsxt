@@ -60,6 +60,13 @@ func TestAccResourceNsxtPolicySegmentSecurityProfile_multitenancy(t *testing.T) 
 	})
 }
 
+func TestAccResourceNsxtPolicySegmentSecurityProfile_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicySegmentSecurityProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicySegmentSecurityProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_segment_security_profile.test"
 
@@ -167,7 +174,7 @@ func TestAccResourceNsxtPolicySegmentSecurityProfile_importBasic_multitenancy(t 
 	testResourceName := "nsxt_policy_segment_security_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySegmentSecurityProfileCheckDestroy(state, name)
@@ -175,6 +182,30 @@ func TestAccResourceNsxtPolicySegmentSecurityProfile_importBasic_multitenancy(t 
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicySegmentSecurityProfileMinimalistic(true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicySegmentSecurityProfile_importBasic_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_segment_security_profile.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySegmentSecurityProfileCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicySegmentSecurityProfileMinimalistic(false),
 			},
 			{
 				ResourceName:      testResourceName,

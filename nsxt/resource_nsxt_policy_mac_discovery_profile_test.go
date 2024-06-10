@@ -34,6 +34,14 @@ func TestAccResourceNsxtPolicyMacDiscoveryProfile_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyMacDiscoveryProfile_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyMacDiscoveryProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccNSXVersion(t, "3.0.0")
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func getMacDiscoveryProfileTestCheckFunc(testResourceName string, create bool) []resource.TestCheckFunc {
 	displayName := createDisplayName
 	if !create {
@@ -159,6 +167,30 @@ func TestAccResourceNsxtPolicyMacDiscoveryProfile_importBasic_multitenancy(t *te
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyMacDiscoveryProfileMinimalistic(true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyMacDiscoveryProfile_importBasic_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_mac_discovery_profile.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyMacDiscoveryProfileCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyMacDiscoveryProfileMinimalistic(false),
 			},
 			{
 				ResourceName:      testResourceName,

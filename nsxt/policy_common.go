@@ -298,7 +298,7 @@ func getSecurityPolicyAndGatewayRuleSchema(scopeRequired bool, isIds bool, nsxID
 		}
 		// Using computed context here, because context is required for consistency and
 		// if it's not provided it can be derived from policy_path.
-		ruleSchema["context"] = getContextSchema(false, true)
+		ruleSchema["context"] = getContextSchema(false, true, false)
 	} else {
 		ruleSchema["sequence_number"] = &schema.Schema{
 			Type:        schema.TypeInt,
@@ -328,7 +328,7 @@ func getPolicySecurityPolicySchema(isIds, withContext, withRule bool) map[string
 		"description":  getDescriptionSchema(),
 		"revision":     getRevisionSchema(),
 		"tag":          getTagsSchema(),
-		"context":      getContextSchema(false, false),
+		"context":      getContextSchema(false, false, false),
 		"domain":       getDomainNameSchema(),
 		"category": {
 			Type:         schema.TypeString,

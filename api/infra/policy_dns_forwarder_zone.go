@@ -34,7 +34,7 @@ func NewDnsForwarderZonesClient(sessionContext utl.SessionContext, connector vap
 	default:
 		return nil
 	}
-	return &PolicyDnsForwarderZoneClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &PolicyDnsForwarderZoneClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c PolicyDnsForwarderZoneClientContext) Get(dnsForwarderZoneIdParam string) (model0.PolicyDnsForwarderZone, error) {

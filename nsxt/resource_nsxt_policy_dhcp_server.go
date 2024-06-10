@@ -33,7 +33,7 @@ func resourceNsxtPolicyDhcpServer() *schema.Resource {
 			"description":       getDescriptionSchema(),
 			"revision":          getRevisionSchema(),
 			"tag":               getTagsSchema(),
-			"context":           getContextSchema(false, false),
+			"context":           getContextSchema(false, false, false),
 			"edge_cluster_path": getPolicyPathSchema(false, false, "Edge Cluster path"),
 			"lease_time": {
 				Type:         schema.TypeInt,
@@ -124,7 +124,11 @@ func resourceNsxtPolicyDhcpServerCreate(d *schema.ResourceData, m interface{}) e
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating DhcpServer with ID %s", id)
-	client := infra.NewDhcpServerConfigsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewDhcpServerConfigsClient(context, connector)
 	err = client.Patch(id, resourceNsxtPolicyDhcpServerSchemaToModel(d))
 	if err != nil {
 		return handleCreateError("DhcpServer", id, err)
@@ -144,7 +148,11 @@ func resourceNsxtPolicyDhcpServerRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Error obtaining DhcpServer ID")
 	}
 
-	client := infra.NewDhcpServerConfigsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewDhcpServerConfigsClient(context, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "DhcpServer", id, err)
@@ -167,7 +175,11 @@ func resourceNsxtPolicyDhcpServerRead(d *schema.ResourceData, m interface{}) err
 
 func resourceNsxtPolicyDhcpServerUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDhcpServerConfigsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewDhcpServerConfigsClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -178,7 +190,7 @@ func resourceNsxtPolicyDhcpServerUpdate(d *schema.ResourceData, m interface{}) e
 	}
 
 	// Update the resource using PATCH
-	err := client.Patch(id, resourceNsxtPolicyDhcpServerSchemaToModel(d))
+	err = client.Patch(id, resourceNsxtPolicyDhcpServerSchemaToModel(d))
 	if err != nil {
 		return handleUpdateError("DhcpServer", id, err)
 	}
@@ -194,7 +206,11 @@ func resourceNsxtPolicyDhcpServerDelete(d *schema.ResourceData, m interface{}) e
 
 	var err error
 	connector := getPolicyConnector(m)
-	client := infra.NewDhcpServerConfigsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewDhcpServerConfigsClient(context, connector)
 	err = client.Delete(id)
 
 	if err != nil {

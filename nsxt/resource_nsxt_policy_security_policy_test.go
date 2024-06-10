@@ -24,6 +24,13 @@ func TestAccResourceNsxtPolicySecurityPolicy_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicySecurityPolicy_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicySecurityPolicyBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicySecurityPolicyBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()

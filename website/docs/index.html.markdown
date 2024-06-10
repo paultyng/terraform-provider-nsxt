@@ -251,6 +251,8 @@ The following arguments are used to configure the VMware NSX-T Provider:
   for VMC environments, and is not supported with deprecated NSX manager resources and
   data sources. Note - this setting is useful when NSX manager is not yet available at 
   time of provider evaluation, and not recommended to be turned on otherwise.
+* `project_id` - (Optional) ID of the project which the plan executes in its context.
+* `vpc_id` - (Optional) ID of the VPC which the plan executes in its context.
 
 ## NSX Logical Networking
 

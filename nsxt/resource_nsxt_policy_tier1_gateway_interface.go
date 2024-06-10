@@ -38,7 +38,7 @@ func resourceNsxtPolicyTier1GatewayInterface() *schema.Resource {
 			"description":            getDescriptionSchema(),
 			"revision":               getRevisionSchema(),
 			"tag":                    getTagsSchema(),
-			"context":                getContextSchema(false, false),
+			"context":                getContextSchema(false, false, false),
 			"gateway_path":           getPolicyPathSchema(true, true, "Policy path for tier1 gateway"),
 			"segment_path":           getPolicyPathSchema(true, true, "Policy path for connected segment"),
 			"subnets":                getGatewayInterfaceSubnetsSchema(),
@@ -88,7 +88,10 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 	sitePath := d.Get("site_path").(string)
 	tier1ID := getPolicyIDFromPath(tier1Path)
 	localeServiceID := ""
-	context := getSessionContext(d, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 	if isPolicyGlobalManager(m) {
 		if sitePath == "" {
 			return attributeRequiredGlobalManagerError("site_path", "nsxt_policy_tier1_gateway_interface")
@@ -120,7 +123,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 		id = newUUID()
 	} else {
 		var err error
-		client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+		client := localeservices.NewInterfacesClient(context, connector)
 		_, err = client.Get(tier1ID, localeServiceID, id)
 
 		if err == nil {
@@ -161,8 +164,8 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating tier1 interface with ID %s", id)
-	client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
-	err := client.Patch(tier1ID, localeServiceID, id, obj)
+	client := localeservices.NewInterfacesClient(context, connector)
+	err = client.Patch(tier1ID, localeServiceID, id, obj)
 
 	if err != nil {
 		return handleCreateError("Tier1 Interface", id, err)
@@ -206,7 +209,11 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 		d.Set("site_path", sitePath)
 	} else {
 		var err error
-		client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+		context, err := getSessionContext(d, m)
+		if err != nil {
+			return err
+		}
+		client := localeservices.NewInterfacesClient(context, connector)
 		obj, err = client.Get(tier1ID, localeServiceID, id)
 		if err != nil {
 			return handleReadError(d, "Tier1 Interface", id, err)
@@ -285,7 +292,11 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		obj.UrpfMode = &urpfMode
 	}
 	var err error
-	client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := localeservices.NewInterfacesClient(context, connector)
 	_, err = client.Update(tier1ID, localeServiceID, id, obj)
 	if err != nil {
 		return handleUpdateError("Tier1 Interface", id, err)
@@ -306,7 +317,11 @@ func resourceNsxtPolicyTier1GatewayInterfaceDelete(d *schema.ResourceData, m int
 	}
 
 	var err error
-	client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := localeservices.NewInterfacesClient(context, connector)
 	err = client.Delete(tier1ID, localeServiceID, id)
 	if err != nil {
 		return handleDeleteError("Tier1 Interface", id, err)
@@ -342,7 +357,11 @@ func resourceNsxtPolicyTier1GatewayInterfaceImport(d *schema.ResourceData, m int
 	gwID := s[0]
 	connector := getPolicyConnector(m)
 	var tier1GW model.Tier1
-	client := infra.NewTier1sClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return nil, err
+	}
+	client := infra.NewTier1sClient(context, connector)
 	tier1GW, err = client.Get(gwID)
 	if err != nil {
 		return nil, err

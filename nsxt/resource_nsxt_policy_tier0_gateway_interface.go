@@ -248,7 +248,10 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 	}
 
 	localeServiceID := ""
-	context := getSessionContext(d, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 	if isPolicyGlobalManager(m) {
 		enablePIM := d.Get("enable_pim").(bool)
 		if enablePIM {
@@ -330,7 +333,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 		obj.EdgePath = &edgePath
 	}
 
-	err := gatewayInterfaceVersionDepenantSet(d, m, &obj)
+	err = gatewayInterfaceVersionDepenantSet(d, m, &obj)
 	if err != nil {
 		return handleCreateError("Tier0 Interface", id, err)
 	}

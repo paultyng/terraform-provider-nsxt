@@ -30,7 +30,7 @@ func NewTier0sClient(sessionContext utl.SessionContext, connector vapiProtocolCl
 	default:
 		return nil
 	}
-	return &Tier0ClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &Tier0ClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c Tier0ClientContext) Get(tier0IdParam string) (model0.Tier0, error) {

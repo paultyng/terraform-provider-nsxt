@@ -39,7 +39,7 @@ func getFloodProtectionProfile() map[string]*schema.Schema {
 		"description":  getDescriptionSchema(),
 		"revision":     getRevisionSchema(),
 		"tag":          getTagsSchema(),
-		"context":      getContextSchema(false, false),
+		"context":      getContextSchema(false, false, false),
 		"icmp_active_flow_limit": {
 			Type:         schema.TypeInt,
 			Description:  "Active ICMP connections limit",
@@ -141,7 +141,11 @@ func resourceNsxtPolicyDistributedFloodProtectionProfilePatch(d *schema.Resource
 	profileStruct := profileValue.(*data.StructValue)
 
 	log.Printf("[INFO] Patching DistributedFloodProtectionProfile with ID %s", id)
-	client := infra.NewFloodProtectionProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewFloodProtectionProfilesClient(context, connector)
 	return client.Patch(id, profileStruct, nil)
 }
 
@@ -173,7 +177,11 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileRead(d *schema.ResourceD
 		return fmt.Errorf("Error obtaining FloodProtectionProfile ID")
 	}
 
-	client := infra.NewFloodProtectionProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewFloodProtectionProfilesClient(context, connector)
 	dpffData, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "FloodProtectionProfile", id, err)
@@ -224,8 +232,12 @@ func resourceNsxtPolicyFloodProtectionProfileDelete(d *schema.ResourceData, m in
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewFloodProtectionProfilesClient(getSessionContext(d, m), connector)
-	err := client.Delete(id, nil)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewFloodProtectionProfilesClient(context, connector)
+	err = client.Delete(id, nil)
 	if err != nil {
 		return handleDeleteError("FloodProtectionProfile", id, err)
 	}

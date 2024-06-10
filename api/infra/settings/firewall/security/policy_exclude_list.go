@@ -30,7 +30,7 @@ func NewExcludeListClient(sessionContext utl.SessionContext, connector vapiProto
 	default:
 		return nil
 	}
-	return &PolicyExcludeListClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &PolicyExcludeListClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c PolicyExcludeListClientContext) Get() (model0.PolicyExcludeList, error) {

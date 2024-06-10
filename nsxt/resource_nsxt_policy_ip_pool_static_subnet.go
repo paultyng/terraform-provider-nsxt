@@ -31,7 +31,7 @@ func resourceNsxtPolicyIPPoolStaticSubnet() *schema.Resource {
 			"description":      getDescriptionSchema(),
 			"revision":         getRevisionSchema(),
 			"tag":              getTagsSchema(),
-			"context":          getContextSchema(false, false),
+			"context":          getContextSchema(false, false, false),
 			"pool_path":        getPolicyPathSchema(true, true, "Policy path to the IP Pool for this Subnet"),
 			"allocation_range": getAllocationRangeListSchema(true, "A collection of IPv4 or IPv6 IP ranges"),
 			"cidr": {
@@ -120,7 +120,11 @@ func resourceNsxtPolicyIPPoolStaticSubnetSchemaToStructValue(d *schema.ResourceD
 
 func resourceNsxtPolicyIPPoolStaticSubnetRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := ippools.NewIpSubnetsClient(context, connector)
 	converter := bindings.NewTypeConverter()
 
 	poolPath := d.Get("pool_path").(string)
@@ -173,7 +177,11 @@ func resourceNsxtPolicyIPPoolStaticSubnetRead(d *schema.ResourceData, m interfac
 
 func resourceNsxtPolicyIPPoolStaticSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := ippools.NewIpSubnetsClient(context, connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -208,7 +216,11 @@ func resourceNsxtPolicyIPPoolStaticSubnetCreate(d *schema.ResourceData, m interf
 
 func resourceNsxtPolicyIPPoolStaticSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := ippools.NewIpSubnetsClient(context, connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -236,7 +248,11 @@ func resourceNsxtPolicyIPPoolStaticSubnetUpdate(d *schema.ResourceData, m interf
 
 func resourceNsxtPolicyIPPoolStaticSubnetDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := ippools.NewIpSubnetsClient(context, connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -247,7 +263,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetDelete(d *schema.ResourceData, m interf
 	}
 
 	log.Printf("[INFO] Deleting Static Subnet with ID %s", id)
-	err := client.Delete(poolID, id, nil)
+	err = client.Delete(poolID, id, nil)
 	if err != nil {
 		return handleDeleteError("Static Subnet", id, err)
 	}

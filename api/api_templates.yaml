@@ -17,7 +17,7 @@ New:
         default:
             return nil
         }
-        return &${model_name}ClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+        return &${model_name}ClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
     }
 Get:
   Convert: |2

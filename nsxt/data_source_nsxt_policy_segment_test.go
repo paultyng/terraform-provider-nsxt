@@ -28,6 +28,13 @@ func TestAccDataSourceNsxtPolicySegment_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicySegment_multitenancyProvider(t *testing.T) {
+	testAccDataSourceNsxtPolicySegmentBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccDataSourceNsxtPolicySegmentBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_segment.test"

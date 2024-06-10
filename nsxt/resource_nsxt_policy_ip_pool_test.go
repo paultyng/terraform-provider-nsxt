@@ -51,6 +51,13 @@ func TestAccResourceNsxtPolicyIPPool_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyIPPool_multitenancyProvider(t *testing.T) {
+	testAccResourceNsxtPolicyIPPoolBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancyProvider(t)
+	})
+}
+
 func testAccResourceNsxtPolicyIPPoolBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
@@ -123,6 +130,30 @@ func TestAccResourceNsxtPolicyIPPool_importBasic_multitenancy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNSXPolicyIPPoolCreateTemplate(name, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyIPPool_importBasic_multitenancyProvider(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_ip_pool.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancyProvider(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXPolicyIPPoolCheckDestroy(state)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyIPPoolCreateTemplate(name, false),
 			},
 			{
 				ResourceName:      testResourceName,

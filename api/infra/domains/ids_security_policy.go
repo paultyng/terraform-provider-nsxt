@@ -29,7 +29,7 @@ func NewIntrusionServicePoliciesClient(sessionContext utl.SessionContext, connec
 	default:
 		return nil
 	}
-	return &IdsSecurityPolicyClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
+	return &IdsSecurityPolicyClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID, VPCID: sessionContext.VPCID}
 }
 
 func (c IdsSecurityPolicyClientContext) Get(domainIdParam string, policyIdParam string) (model0.IdsSecurityPolicy, error) {
