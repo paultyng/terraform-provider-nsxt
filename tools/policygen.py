@@ -1,8 +1,9 @@
 #!/usr/bin/python
 # -*- coding: latin-1 -*-
 
-#  Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-#  SPDX-License-Identifier: MPL-2.0
+# © Broadcom. All Rights Reserved.
+# The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+# SPDX-License-Identifier: MPL-2.0s
 
 # Generating Resources:
 # 1. Run the following command: python policygen.py <resources struct name>
@@ -120,7 +121,7 @@ def get_value_for_const(attr, num=1):
             if num == 0:
                 return value
 
-            
+
 def convert_value_to_hcl(attr_type, attr_value):
     if attr_type == "string":
         return "\"%s\"" % attr_value

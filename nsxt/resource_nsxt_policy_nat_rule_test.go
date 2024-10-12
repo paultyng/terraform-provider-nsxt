@@ -1,5 +1,6 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -583,7 +584,7 @@ resource "nsxt_policy_nat_rule" "test" {
   translated_networks   = ["%s"]
   logging               = false
   firewall_match        = "%s"
-  service               = data.nsxt_policy_service.test.path 
+  service               = data.nsxt_policy_service.test.path
 
   tag {
     scope = "scope1"
@@ -620,7 +621,7 @@ resource "nsxt_policy_nat_rule" "test" {
   translated_networks   = ["%s"]
   logging               = false
   firewall_match        = "%s"
-  service               = data.nsxt_policy_service.test.path 
+  service               = data.nsxt_policy_service.test.path
   policy_based_vpn_mode = "%s"
 
   tag {
@@ -742,12 +743,12 @@ func testAccNsxPolicyNatRuleNoTranslatedNetworkTemplate(name string, action stri
 	  destination_networks  = ["%s"]
 	  logging               = false
 	  firewall_match        = "%s"
-	
+
 	  tag {
 		scope = "scope1"
 		tag   = "tag1"
 	  }
-	
+
 	  tag {
 		scope = "scope2"
 		tag   = "tag2"

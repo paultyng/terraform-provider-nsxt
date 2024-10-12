@@ -1,5 +1,6 @@
-/* Copyright © 2020 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -209,7 +210,7 @@ resource "nsxt_policy_gateway_route_map" "test" {
       weight                    = 12
     }
   }
-  
+
   entry {
     action = "DENY"
     community_list_match {

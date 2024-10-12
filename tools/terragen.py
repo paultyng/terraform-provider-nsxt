@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # -*- coding: latin-1 -*-
 
-#  Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-#  SPDX-License-Identifier: MPL-2.0
-
+# © Broadcom. All Rights Reserved.
+# The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+# SPDX-License-Identifier: MPL-2.0
 
 import sys
 import re
@@ -77,8 +77,9 @@ def pretty_writeln(f, line):
 
 
 def write_header(f):
-    pretty_writeln(f, "/* Copyright © 2018 VMware, Inc. All Rights Reserved.")
-    pretty_writeln(f, "   SPDX-License-Identifier: MPL-2.0 */\n")
+    pretty_writeln(f, "// © Broadcom. All Rights Reserved.")
+    pretty_writeln(f, "// The term \"Broadcom\" refers to Broadcom Inc. and/or its subsidiaries.")
+    pretty_writeln(f, "// SPDX-License-Identifier: MPL-2.0\n")
 
     pretty_writeln(f, "package %s\n" % PACKAGE_NAME)
     pretty_writeln(f, "import (")

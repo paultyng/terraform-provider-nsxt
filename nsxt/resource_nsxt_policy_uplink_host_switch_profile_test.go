@@ -1,5 +1,6 @@
-/* Copyright © 2023 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -321,6 +322,6 @@ resource "nsxt_policy_uplink_host_switch_profile" "test" {
       uplink_type = "%s"
     }
     policy = "%s"
-  }	
+  }
 }`, accTestUplinkHostSwitchProfileUpdateAttributes["display_name"], accTestUplinkHostSwitchProfileUpdateAttributes["teaming_al_uplink_name"], accTestUplinkHostSwitchProfileUpdateAttributes["teaming_al_uplink_type"], accTestUplinkHostSwitchProfileUpdateAttributes["teaming_policy"])
 }

@@ -1,5 +1,6 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -932,7 +933,7 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 	}
 	condition {
 	  http_request_body {
-  	    body_value = "xyz"	
+  	    body_value = "xyz"
 	    match_type = "REGEX"
 	  }
 	}
@@ -968,7 +969,7 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 	}
 	condition {
 	  http_request_header {
-	    header_name = "my_head"	
+	    header_name = "my_head"
 	    header_value = "has_hair"
 	    match_type = "REGEX"
 	  }
@@ -990,11 +991,11 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 	condition {
 	  http_request_uri_arguments {
 	    uri_arguments = "foo=bar"
-	    match_type = "REGEX"	
+	    match_type = "REGEX"
 	  }
 	  http_request_uri {
 	    uri = "xyz"
-	    match_type = "REGEX"	
+	    match_type = "REGEX"
 	  }
 	}
   }
@@ -1060,13 +1061,13 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 	action {
 	  select_pool {
             pool_id = nsxt_policy_lb_pool.pool.path
-	  } 
+	  }
 	}
         condition {
 	  ssl_sni {
 	    match_type = "REGEX"
 	    sni = "HELO"
-	  } 
+	  }
 	}
   }
   rule {
@@ -1082,11 +1083,11 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 	  variable {
 	    variable_name = "my_var"
 	    variable_value = "my_value"
-	    match_type = "REGEX"	
-	  }  
+	    match_type = "REGEX"
+	  }
 	  tcp_header {
-		source_port = "80"	
-	  }  
+		source_port = "80"
+	  }
 	}
   }
   rule {
@@ -1097,19 +1098,19 @@ resource "nsxt_policy_lb_virtual_server" "test" {
             persistence_profile_path = data.nsxt_policy_lb_persistence_profile.generic.path
 	    variable_hash_enabled = true
 	    variable_name = "my_name"
-	  }  
+	  }
 	}
 	condition {
 	  http_ssl {
 	    session_reused = "IGNORE"
 	    used_protocol = "TLS_V1_2"
-	    used_ssl_cipher = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"	
+	    used_ssl_cipher = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
 	    client_certificate_issuer_dn {
 		  issuer_dn = "something"
 		  match_type = "REGEX"
 	    }
 	    client_certificate_subject_dn {
-		  subject_dn = "something"  
+		  subject_dn = "something"
 		  match_type = "REGEX"
 	    }
 	    client_supported_ssl_ciphers = [ "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384" ]
@@ -1123,12 +1124,12 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 	  variable_persistence_learn {
             persistence_profile_path = data.nsxt_policy_lb_persistence_profile.generic.path
 	    variable_name = "my_name"
-	  }  
+	  }
 	}
 	condition {
 	  http_ssl {
 	    used_protocol = "TLS_V1_2"
-	    used_ssl_cipher = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"	
+	    used_ssl_cipher = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
 	  }
 	}
   }
@@ -1140,7 +1141,7 @@ resource "nsxt_policy_lb_virtual_server" "test" {
             persistence_profile_path = data.nsxt_policy_lb_persistence_profile.generic.path
 	    variable_hash_enabled = false
 	    variable_name = "my_name"
-	  }  
+	  }
 	}
   }
   rule {

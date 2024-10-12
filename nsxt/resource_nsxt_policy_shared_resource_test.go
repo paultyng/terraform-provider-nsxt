@@ -1,5 +1,6 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -200,7 +201,7 @@ func testAccNsxtPolicySharedResourceTemplate(createFlow bool) string {
 resource "nsxt_policy_shared_resource" "test" {
   display_name = "%s"
   description  = "%s"
-  
+
   share_path   = nsxt_policy_share.test.path
   resource_object {
     resource_path = data.nsxt_policy_context_profile.test.path
