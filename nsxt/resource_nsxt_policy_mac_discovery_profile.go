@@ -131,7 +131,7 @@ func resourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
 		Update: resourceNsxtPolicyMacDiscoveryProfileUpdate,
 		Delete: resourceNsxtPolicyMacDiscoveryProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/mac-discovery-profiles/[profile]")),
 		},
 
 		Schema: metadata.GetSchemaFromExtendedSchema(macDiscoveryProfileSchema),

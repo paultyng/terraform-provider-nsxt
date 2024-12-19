@@ -80,7 +80,7 @@ func resourceNsxtPolicyGatewayConnection() *schema.Resource {
 		Update: resourceNsxtPolicyGatewayConnectionUpdate,
 		Delete: resourceNsxtPolicyGatewayConnectionDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathOnlyResourceImporter,
+			State: getFriendlyPolicyPathResourceImporter("/infra/gateway-connections/[connection]"),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(gatewayConnectionSchema),
 	}

@@ -18,7 +18,7 @@ func resourceNsxtPolicyVlanSegment() *schema.Resource {
 		Update: resourceNsxtPolicyVlanSegmentUpdate,
 		Delete: resourceNsxtPolicyVlanSegmentDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/segments/[segment]")),
 		},
 
 		Schema: segSchema,

@@ -22,7 +22,7 @@ func resourceNsxtVtepHAHostSwitchProfile() *schema.Resource {
 		Update: resourceNsxtVtepHAHostSwitchProfileUpdate,
 		Delete: resourceNsxtVtepHAHostSwitchProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getFriendlyPolicyPathOrIDResourceImporter("/infra/host-switch-profiles/[profile]"),
 		},
 
 		Schema: map[string]*schema.Schema{

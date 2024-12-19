@@ -28,7 +28,7 @@ func resourceNsxtPolicyLBClientSslProfile() *schema.Resource {
 		Update: resourceNsxtPolicyLBClientSslProfileUpdate,
 		Delete: resourceNsxtPolicyLBClientSslProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getFriendlyPolicyPathOrIDResourceImporter("/infra/lb-client-ssl-profiles/[profile]"),
 		},
 
 		Schema: map[string]*schema.Schema{

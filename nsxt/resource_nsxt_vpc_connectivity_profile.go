@@ -192,7 +192,7 @@ func resourceNsxtVpcConnectivityProfile() *schema.Resource {
 		Update: resourceNsxtVpcConnectivityProfileUpdate,
 		Delete: resourceNsxtVpcConnectivityProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathOnlyResourceImporter,
+			State: getFriendlyPolicyPathResourceImporter("/orgs/[org]/projects/[project]/vpc-connectivity-profiles/[profile]"),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcConnectivityProfileSchema),
 	}

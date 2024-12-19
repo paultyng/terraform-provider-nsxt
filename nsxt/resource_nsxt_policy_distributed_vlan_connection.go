@@ -61,7 +61,7 @@ func resourceNsxtPolicyDistributedVlanConnection() *schema.Resource {
 		Update: resourceNsxtPolicyDistributedVlanConnectionUpdate,
 		Delete: resourceNsxtPolicyDistributedVlanConnectionDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathOnlyResourceImporter,
+			State: getFriendlyPolicyPathResourceImporter("/infra/distributed-vlan-connections/[connection]"),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(distributedVlanConnectionSchema),
 	}

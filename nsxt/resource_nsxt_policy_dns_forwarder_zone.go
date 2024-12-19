@@ -23,7 +23,7 @@ func resourceNsxtPolicyDNSForwarderZone() *schema.Resource {
 		Update: resourceNsxtPolicyDNSForwarderZoneUpdate,
 		Delete: resourceNsxtPolicyDNSForwarderZoneDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/dns-forwarder-zones/[profile]")),
 		},
 
 		Schema: map[string]*schema.Schema{

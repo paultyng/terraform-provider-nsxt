@@ -26,7 +26,7 @@ func resourceNsxtPolicyShare() *schema.Resource {
 		Update: resourceNsxtPolicyShareUpdate,
 		Delete: resourceNsxtPolicyShareDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathOnlyResourceImporter,
+			State: getFriendlyPolicyPathResourceImporter("/infra/shares/[share] or /orgs/[org]/projects/[project]/infra/shares/[share]"),
 		},
 
 		Schema: map[string]*schema.Schema{

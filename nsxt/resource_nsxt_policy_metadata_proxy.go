@@ -22,7 +22,7 @@ func resourceNsxtPolicyMetadataProxy() *schema.Resource {
 		Update: resourceNsxtPolicyMetadataProxyUpdate,
 		Delete: resourceNsxtPolicyMetadataProxyDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/metadata-proxies/[profile]")),
 		},
 
 		Schema: map[string]*schema.Schema{

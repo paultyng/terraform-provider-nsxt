@@ -447,7 +447,7 @@ func resourceNsxtVpcSubnet() *schema.Resource {
 		Update: resourceNsxtVpcSubnetUpdate,
 		Delete: resourceNsxtVpcSubnetDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVPCPathResourceImporter,
+			State: getFriendlyVpcPathResourceImporter("/orgs/[org]/projects/[project]/vpcs/[vpc]/subnets/[subnet]"),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcSubnetSchema),
 	}

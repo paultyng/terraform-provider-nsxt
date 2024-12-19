@@ -36,7 +36,7 @@ func resourceNsxtPolicyVMTags() *schema.Resource {
 		Update: resourceNsxtPolicyVMTagsUpdate,
 		Delete: resourceNsxtPolicyVMTagsDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/realized-state/virtual-machines/[vm]")),
 		},
 
 		Schema: map[string]*schema.Schema{

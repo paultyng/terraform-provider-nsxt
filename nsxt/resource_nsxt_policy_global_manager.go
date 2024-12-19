@@ -25,7 +25,7 @@ func resourceNsxtPolicyGlobalManager() *schema.Resource {
 		Update: resourceNsxtPolicyGlobalManagerUpdate,
 		Delete: resourceNsxtPolicyGlobalManagerDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getFriendlyPolicyPathOrIDResourceImporter("/global-infra/global-managers/[manager]"),
 		},
 
 		Schema: map[string]*schema.Schema{

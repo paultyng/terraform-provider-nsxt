@@ -22,7 +22,7 @@ func resourceNsxtVPCGatewayPolicy() *schema.Resource {
 		Update: resourceNsxtVPCGatewayPolicyUpdate,
 		Delete: resourceNsxtVPCGatewayPolicyDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVPCPathResourceImporter,
+			State: getFriendlyVpcPathResourceImporter("/orgs/[org]/projects/[project]/vpcs/[vpc]/gateway-policies/[policy]"),
 		},
 
 		Schema: getPolicyGatewayPolicySchema(true),

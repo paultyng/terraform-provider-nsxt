@@ -23,7 +23,7 @@ func resourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
 		Update: resourceNsxtPolicyIPDiscoveryProfileUpdate,
 		Delete: resourceNsxtPolicyIPDiscoveryProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/ip-discovery-profiles/[profile]")),
 		},
 
 		Schema: map[string]*schema.Schema{

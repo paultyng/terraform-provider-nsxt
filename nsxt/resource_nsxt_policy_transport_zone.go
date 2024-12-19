@@ -25,7 +25,7 @@ func resourceNsxtPolicyTransportZone() *schema.Resource {
 		Update: resourceNsxtPolicyTransportZoneUpdate,
 		Delete: resourceNsxtPolicyTransportZoneDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceNsxtPolicyTransportZoneImporter,
+			State: getFriendlyPolicyPathOrIDResourceImporter("/infra/sites/[site]/enforcement-points/[enforcement-point]/transport-zones/[transport-zone]"),
 		},
 
 		Schema: map[string]*schema.Schema{

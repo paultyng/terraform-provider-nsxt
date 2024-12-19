@@ -62,7 +62,7 @@ func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 		Update: resourceNsxtPolicyTier1GatewayUpdate,
 		Delete: resourceNsxtPolicyTier1GatewayDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/tier-1s/[gateway]")),
 		},
 
 		Schema: map[string]*schema.Schema{

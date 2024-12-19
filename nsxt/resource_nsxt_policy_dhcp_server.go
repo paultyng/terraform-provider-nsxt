@@ -23,7 +23,7 @@ func resourceNsxtPolicyDhcpServer() *schema.Resource {
 		Update: resourceNsxtPolicyDhcpServerUpdate,
 		Delete: resourceNsxtPolicyDhcpServerDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/dhcp-servers/[dhcp-server]")),
 		},
 
 		Schema: map[string]*schema.Schema{

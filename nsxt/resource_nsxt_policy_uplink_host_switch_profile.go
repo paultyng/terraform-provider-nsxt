@@ -56,7 +56,7 @@ func resourceNsxtUplinkHostSwitchProfile() *schema.Resource {
 		Update: resourceNsxtUplinkHostSwitchProfileUpdate,
 		Delete: resourceNsxtUplinkHostSwitchProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getFriendlyPolicyPathOrIDResourceImporter("/infra/host-switch-profiles/[profile]"),
 		},
 
 		Schema: map[string]*schema.Schema{
