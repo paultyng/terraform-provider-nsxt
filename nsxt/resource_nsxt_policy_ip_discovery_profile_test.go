@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -58,18 +59,22 @@ func TestAccResourceNsxtPolicyIPDiscoveryProfile_multitenancy(t *testing.T) {
 
 func testAccResourceNsxtPolicyIPDiscoveryProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_ip_discovery_profile.test"
+	var clientType tf_api.ClientType = tf_api.Local
+	if withContext {
+		clientType = tf_api.Multitenancy
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyIPDiscoveryProfileCheckDestroy(state, accTestPolicyIPDiscoveryProfileUpdateAttributes["display_name"])
+			return testAccNsxtPolicyIPDiscoveryProfileCheckDestroy(state, accTestPolicyIPDiscoveryProfileUpdateAttributes["display_name"], clientType)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyIPDiscoveryProfileTemplate(true, withContext),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyIPDiscoveryProfileExists(accTestPolicyIPDiscoveryProfileCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyIPDiscoveryProfileExists(accTestPolicyIPDiscoveryProfileCreateAttributes["display_name"], testResourceName, clientType),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPDiscoveryProfileCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPDiscoveryProfileCreateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "arp_nd_binding_timeout", accTestPolicyIPDiscoveryProfileCreateAttributes["arp_nd_binding_timeout"]),
@@ -93,7 +98,7 @@ func testAccResourceNsxtPolicyIPDiscoveryProfileBasic(t *testing.T, withContext 
 			{
 				Config: testAccNsxtPolicyIPDiscoveryProfileTemplate(false, withContext),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyIPDiscoveryProfileExists(accTestPolicyIPDiscoveryProfileUpdateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyIPDiscoveryProfileExists(accTestPolicyIPDiscoveryProfileUpdateAttributes["display_name"], testResourceName, clientType),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPDiscoveryProfileUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyIPDiscoveryProfileUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "arp_nd_binding_timeout", accTestPolicyIPDiscoveryProfileUpdateAttributes["arp_nd_binding_timeout"]),
@@ -117,7 +122,7 @@ func testAccResourceNsxtPolicyIPDiscoveryProfileBasic(t *testing.T, withContext 
 			{
 				Config: testAccNsxtPolicyIPDiscoveryProfileMinimalistic(withContext),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyIPDiscoveryProfileExists(accTestPolicyIPDiscoveryProfileCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyIPDiscoveryProfileExists(accTestPolicyIPDiscoveryProfileCreateAttributes["display_name"], testResourceName, clientType),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -148,7 +153,7 @@ func TestAccResourceNsxtPolicyIPDiscoveryProfile_importBasic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyIPDiscoveryProfileCheckDestroy(state, name)
+			return testAccNsxtPolicyIPDiscoveryProfileCheckDestroy(state, name, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -171,7 +176,7 @@ func TestAccResourceNsxtPolicyIPDiscoveryProfile_importBasic_multitenancy(t *tes
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyIPDiscoveryProfileCheckDestroy(state, name)
+			return testAccNsxtPolicyIPDiscoveryProfileCheckDestroy(state, name, tf_api.Multitenancy)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -187,7 +192,7 @@ func TestAccResourceNsxtPolicyIPDiscoveryProfile_importBasic_multitenancy(t *tes
 	})
 }
 
-func testAccNsxtPolicyIPDiscoveryProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
+func testAccNsxtPolicyIPDiscoveryProfileExists(displayName string, resourceName string, clientType tf_api.ClientType) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
@@ -202,7 +207,7 @@ func testAccNsxtPolicyIPDiscoveryProfileExists(displayName string, resourceName 
 			return fmt.Errorf("Policy IPDiscoveryProfile resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyIPDiscoveryProfileExists(testAccGetSessionContext(), resourceID, connector)
+		exists, err := resourceNsxtPolicyIPDiscoveryProfileExists(testAccGetContextByType(clientType), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -214,7 +219,7 @@ func testAccNsxtPolicyIPDiscoveryProfileExists(displayName string, resourceName 
 	}
 }
 
-func testAccNsxtPolicyIPDiscoveryProfileCheckDestroy(state *terraform.State, displayName string) error {
+func testAccNsxtPolicyIPDiscoveryProfileCheckDestroy(state *terraform.State, displayName string, clientType tf_api.ClientType) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 
@@ -223,7 +228,7 @@ func testAccNsxtPolicyIPDiscoveryProfileCheckDestroy(state *terraform.State, dis
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyIPDiscoveryProfileExists(testAccGetSessionContext(), resourceID, connector)
+		exists, err := resourceNsxtPolicyIPDiscoveryProfileExists(testAccGetContextByType(clientType), resourceID, connector)
 		if err == nil {
 			return err
 		}
@@ -244,7 +249,7 @@ func testAccNsxtPolicyIPDiscoveryProfileTemplate(createFlow, withContext bool) s
 	}
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtProjectContext()
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_discovery_profile" "test" {
@@ -272,7 +277,7 @@ resource "nsxt_policy_ip_discovery_profile" "test" {
 func testAccNsxtPolicyIPDiscoveryProfileMinimalistic(withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtProjectContext()
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_discovery_profile" "test" {

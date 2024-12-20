@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"os"
 	"testing"
 
@@ -49,13 +50,13 @@ func TestAccResourceNsxtVPCGroup_addressCriteria(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain, tf_api.VPC)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtVPCGroupAddressCreateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.VPC),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -71,7 +72,7 @@ func TestAccResourceNsxtVPCGroup_addressCriteria(t *testing.T) {
 			{
 				Config: testAccNsxtVPCGroupAddressUpdateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.VPC),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),

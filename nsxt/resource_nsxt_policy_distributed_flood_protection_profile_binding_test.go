@@ -6,6 +6,7 @@ package nsxt
 
 import (
 	"fmt"
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -44,18 +45,22 @@ func testAccResourceNsxtPolicyDistributedFloodProtectionProfileBindingBasic(t *t
 	}
 	name := getAccTestResourceName()
 	updatedName := fmt.Sprintf("%s-updated", name)
+	var clientType tf_api.ClientType = tf_api.Local
+	if withContext {
+		clientType = tf_api.Multitenancy
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyDistributedFloodProtectionProfileBindingCheckDestroy(state, name)
+			return testAccNsxtPolicyDistributedFloodProtectionProfileBindingCheckDestroy(state, name, clientType)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyDistributedFloodProtectionProfileBindingTemplate(true, withContext, name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyDistributedFloodProtectionProfileBindingExists(testResourceName),
+					testAccNsxtPolicyDistributedFloodProtectionProfileBindingExists(testResourceName, clientType),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyDistributedFloodProtectionProfileBindingCreateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "sequence_number", accTestPolicyDistributedFloodProtectionProfileBindingCreateAttributes["seq_num"]),
@@ -70,7 +75,7 @@ func testAccResourceNsxtPolicyDistributedFloodProtectionProfileBindingBasic(t *t
 			{
 				Config: testAccNsxtPolicyDistributedFloodProtectionProfileBindingTemplate(false, withContext, updatedName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyDistributedFloodProtectionProfileBindingExists(testResourceName),
+					testAccNsxtPolicyDistributedFloodProtectionProfileBindingExists(testResourceName, clientType),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyDistributedFloodProtectionProfileBindingUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "sequence_number", accTestPolicyDistributedFloodProtectionProfileBindingUpdateAttributes["seq_num"]),
@@ -101,8 +106,10 @@ func TestAccResourceNsxtPolicyDistributedFloodProtectionProfileBinding_importBas
 
 func testAccResourceNsxtPolicyDistributedFloodProtectionProfileBindingImportBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_distributed_flood_protection_profile_binding.test"
+	var clientType tf_api.ClientType = tf_api.Local
 	if withContext {
 		testResourceName = "nsxt_policy_distributed_flood_protection_profile_binding.mttest"
+		clientType = tf_api.Multitenancy
 	}
 	name := getAccTestResourceName()
 
@@ -110,7 +117,7 @@ func testAccResourceNsxtPolicyDistributedFloodProtectionProfileBindingImportBasi
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyDistributedFloodProtectionProfileBindingCheckDestroy(state, name)
+			return testAccNsxtPolicyDistributedFloodProtectionProfileBindingCheckDestroy(state, name, clientType)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -126,7 +133,7 @@ func testAccResourceNsxtPolicyDistributedFloodProtectionProfileBindingImportBasi
 	})
 }
 
-func testAccNsxtPolicyDistributedFloodProtectionProfileBindingExists(resourceName string) resource.TestCheckFunc {
+func testAccNsxtPolicyDistributedFloodProtectionProfileBindingExists(resourceName string, clientType tf_api.ClientType) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
@@ -145,7 +152,7 @@ func testAccNsxtPolicyDistributedFloodProtectionProfileBindingExists(resourceNam
 			return fmt.Errorf("Policy DistributedFloodProtectionProfileBinding resource group_path not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyDistributedFloodProtectionProfileBindingExists(testAccGetSessionContext(), connector, groupPath, resourceID)
+		exists, err := resourceNsxtPolicyDistributedFloodProtectionProfileBindingExists(testAccGetContextByType(clientType), connector, groupPath, resourceID)
 		if err != nil {
 			return err
 		}
@@ -157,7 +164,7 @@ func testAccNsxtPolicyDistributedFloodProtectionProfileBindingExists(resourceNam
 	}
 }
 
-func testAccNsxtPolicyDistributedFloodProtectionProfileBindingCheckDestroy(state *terraform.State, displayName string) error {
+func testAccNsxtPolicyDistributedFloodProtectionProfileBindingCheckDestroy(state *terraform.State, displayName string, clientType tf_api.ClientType) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 
@@ -167,7 +174,7 @@ func testAccNsxtPolicyDistributedFloodProtectionProfileBindingCheckDestroy(state
 
 		resourceID := rs.Primary.Attributes["id"]
 		groupPath := rs.Primary.Attributes["group_path"]
-		exists, err := resourceNsxtPolicyDistributedFloodProtectionProfileBindingExists(testAccGetSessionContext(), connector, groupPath, resourceID)
+		exists, err := resourceNsxtPolicyDistributedFloodProtectionProfileBindingExists(testAccGetContextByType(clientType), connector, groupPath, resourceID)
 		if err == nil {
 			return err
 		}
@@ -189,7 +196,7 @@ func testAccNsxtPolicyDistributedFloodProtectionProfileBindingTemplate(createFlo
 	context := ""
 	resourceName := "test"
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtProjectContext()
 		resourceName = "mttest"
 	}
 	return testAccNsxtPolicyDistributedFloodProtectionProfileBindingDeps(withContext) + fmt.Sprintf(`
@@ -212,7 +219,7 @@ resource "nsxt_policy_distributed_flood_protection_profile_binding" "%s" {
 func testAccNsxtPolicyDistributedFloodProtectionProfileBindingDeps(withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtProjectContext()
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {

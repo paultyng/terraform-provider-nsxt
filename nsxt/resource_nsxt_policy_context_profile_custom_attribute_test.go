@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -32,18 +33,22 @@ func TestAccResourceNsxtPolicyContextProfileCustomAttribute_multitenancy(t *test
 
 func testAccResourceNsxtPolicyContextProfileCustomAttributeBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_context_profile_custom_attribute.test"
+	var clientType tf_api.ClientType = tf_api.Local
+	if withContext {
+		clientType = tf_api.Multitenancy
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyContextProfileCustomAttributeCheckDestroy(state, accTestPolicyContextProfileCustomAttributeAttributes["attribute"])
+			return testAccNsxtPolicyContextProfileCustomAttributeCheckDestroy(state, accTestPolicyContextProfileCustomAttributeAttributes["attribute"], clientType)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyContextProfileCustomAttributeTemplate(withContext),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyContextProfileCustomAttributeExists(accTestPolicyContextProfileCustomAttributeAttributes["attribute"], testResourceName),
+					testAccNsxtPolicyContextProfileCustomAttributeExists(accTestPolicyContextProfileCustomAttributeAttributes["attribute"], testResourceName, clientType),
 					resource.TestCheckResourceAttr(testResourceName, "key", accTestPolicyContextProfileCustomAttributeAttributes["key"]),
 					resource.TestCheckResourceAttr(testResourceName, "attribute", accTestPolicyContextProfileCustomAttributeAttributes["attribute"]),
 				),
@@ -60,7 +65,7 @@ func TestAccResourceNsxtPolicyContextProfileCustomAttribute_importBasic(t *testi
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyContextProfileCustomAttributeCheckDestroy(state, name)
+			return testAccNsxtPolicyContextProfileCustomAttributeCheckDestroy(state, name, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -75,7 +80,7 @@ func TestAccResourceNsxtPolicyContextProfileCustomAttribute_importBasic(t *testi
 	})
 }
 
-func testAccNsxtPolicyContextProfileCustomAttributeExists(displayName string, resourceName string) resource.TestCheckFunc {
+func testAccNsxtPolicyContextProfileCustomAttributeExists(displayName string, resourceName string, clientType tf_api.ClientType) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
@@ -90,7 +95,7 @@ func testAccNsxtPolicyContextProfileCustomAttributeExists(displayName string, re
 			return fmt.Errorf("Policy ContextProfileCustomAttribute resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyContextProfileCustomAttributeExists(testAccGetSessionContext(), resourceID, connector)
+		exists, err := resourceNsxtPolicyContextProfileCustomAttributeExists(testAccGetContextByType(clientType), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -102,7 +107,7 @@ func testAccNsxtPolicyContextProfileCustomAttributeExists(displayName string, re
 	}
 }
 
-func testAccNsxtPolicyContextProfileCustomAttributeCheckDestroy(state *terraform.State, attribute string) error {
+func testAccNsxtPolicyContextProfileCustomAttributeCheckDestroy(state *terraform.State, attribute string, clientType tf_api.ClientType) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 
@@ -111,7 +116,7 @@ func testAccNsxtPolicyContextProfileCustomAttributeCheckDestroy(state *terraform
 		}
 
 		resourceID := makeCustomAttributeID(model.PolicyCustomAttributes_KEY_DOMAIN_NAME, rs.Primary.Attributes["attribute"])
-		exists, err := resourceNsxtPolicyContextProfileCustomAttributeExists(testAccGetSessionContext(), resourceID, connector)
+		exists, err := resourceNsxtPolicyContextProfileCustomAttributeExists(testAccGetContextByType(clientType), resourceID, connector)
 		if err == nil {
 			return err
 		}
@@ -133,7 +138,7 @@ func testAccNsxtPolicyContextProfileCustomAttributeTemplate(withContext bool) st
 func testAccNsxtPolicyContextProfileCustomAttributeArgTemplate(key string, attribute string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtProjectContext()
 	}
 
 	return fmt.Sprintf(`

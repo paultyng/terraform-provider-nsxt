@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"os"
 	"testing"
 
@@ -40,18 +41,22 @@ func TestAccResourceNsxtPolicyDhcpServer_multitenancy(t *testing.T) {
 
 func testAccResourceNsxtPolicyDhcpServerBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_dhcp_server.test"
+	var clientType tf_api.ClientType = tf_api.Local
+	if withContext {
+		clientType = tf_api.Multitenancy
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyDhcpServerCheckDestroy(state, accTestPolicyDhcpServerUpdateAttributes["display_name"])
+			return testAccNsxtPolicyDhcpServerCheckDestroy(state, accTestPolicyDhcpServerUpdateAttributes["display_name"], clientType)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyDhcpServerCreateTemplate(withContext),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyDhcpServerExists(testResourceName),
+					testAccNsxtPolicyDhcpServerExists(testResourceName, clientType),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyDhcpServerCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyDhcpServerCreateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "lease_time", accTestPolicyDhcpServerCreateAttributes["lease_time"]),
@@ -68,7 +73,7 @@ func testAccResourceNsxtPolicyDhcpServerBasic(t *testing.T, withContext bool, pr
 			{
 				Config: testAccNsxtPolicyDhcpServerUpdateTemplate(withContext),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyDhcpServerExists(testResourceName),
+					testAccNsxtPolicyDhcpServerExists(testResourceName, clientType),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyDhcpServerUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyDhcpServerUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "lease_time", accTestPolicyDhcpServerUpdateAttributes["lease_time"]),
@@ -85,7 +90,7 @@ func testAccResourceNsxtPolicyDhcpServerBasic(t *testing.T, withContext bool, pr
 			{
 				Config: testAccNsxtPolicyDhcpServerMinimalistic(withContext),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyDhcpServerExists(testResourceName),
+					testAccNsxtPolicyDhcpServerExists(testResourceName, clientType),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -107,7 +112,7 @@ func TestAccResourceNsxtPolicyDhcpServer_importBasic(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyDhcpServerCheckDestroy(state, name)
+			return testAccNsxtPolicyDhcpServerCheckDestroy(state, name, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -130,7 +135,7 @@ func TestAccResourceNsxtPolicyDhcpServer_importBasic_multitenancy(t *testing.T) 
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyDhcpServerCheckDestroy(state, name)
+			return testAccNsxtPolicyDhcpServerCheckDestroy(state, name, tf_api.Multitenancy)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -146,7 +151,7 @@ func TestAccResourceNsxtPolicyDhcpServer_importBasic_multitenancy(t *testing.T) 
 	})
 }
 
-func testAccNsxtPolicyDhcpServerExists(resourceName string) resource.TestCheckFunc {
+func testAccNsxtPolicyDhcpServerExists(resourceName string, clientType tf_api.ClientType) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
@@ -161,7 +166,7 @@ func testAccNsxtPolicyDhcpServerExists(resourceName string) resource.TestCheckFu
 			return fmt.Errorf("Policy DhcpServer resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyDhcpServerExists(testAccGetSessionContext(), resourceID, connector)
+		exists, err := resourceNsxtPolicyDhcpServerExists(testAccGetContextByType(clientType), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -173,7 +178,7 @@ func testAccNsxtPolicyDhcpServerExists(resourceName string) resource.TestCheckFu
 	}
 }
 
-func testAccNsxtPolicyDhcpServerCheckDestroy(state *terraform.State, displayName string) error {
+func testAccNsxtPolicyDhcpServerCheckDestroy(state *terraform.State, displayName string, clientType tf_api.ClientType) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 
@@ -182,7 +187,7 @@ func testAccNsxtPolicyDhcpServerCheckDestroy(state *terraform.State, displayName
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyDhcpServerExists(testAccGetSessionContext(), resourceID, connector)
+		exists, err := resourceNsxtPolicyDhcpServerExists(testAccGetContextByType(clientType), resourceID, connector)
 		if err == nil {
 			return err
 		}
@@ -200,7 +205,7 @@ func testAccNsxtPolicyDhcpServerCreateTemplate(withContext bool) string {
 	defsSpec := testAccNsxtPolicyGatewayFabricDeps(false)
 	edgeClusterSpec := "data.nsxt_policy_edge_cluster.EC.path"
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtProjectContext()
 		defsSpec, edgeClusterSpec = testAccNsxtPolicyProjectSpec()
 	}
 

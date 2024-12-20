@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"os"
 	"testing"
 
@@ -33,13 +34,13 @@ func TestAccResourceNsxtPolicyShare_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyShareCheckDestroy(state, accTestPolicyShareUpdateAttributes["display_name"])
+			return testAccNsxtPolicyShareCheckDestroy(state, accTestPolicyShareUpdateAttributes["display_name"], tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyShareTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyShareExists(accTestPolicyShareCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyShareExists(accTestPolicyShareCreateAttributes["display_name"], testResourceName, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyShareCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyShareCreateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -51,7 +52,7 @@ func TestAccResourceNsxtPolicyShare_basic(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyShareTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyShareExists(accTestPolicyShareUpdateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyShareExists(accTestPolicyShareUpdateAttributes["display_name"], testResourceName, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyShareUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyShareUpdateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -76,7 +77,7 @@ func TestAccResourceNsxtPolicyShare_importBasic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyShareCheckDestroy(state, name)
+			return testAccNsxtPolicyShareCheckDestroy(state, name, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -103,13 +104,13 @@ func TestAccResourceNsxtPolicyShare_multitenancy(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyShareCheckDestroy(state, accTestPolicyShareUpdateAttributes["display_name"])
+			return testAccNsxtPolicyShareCheckDestroy(state, accTestPolicyShareUpdateAttributes["display_name"], tf_api.Multitenancy)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyShareWithMyselfTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyShareExists(accTestPolicyShareCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyShareExists(accTestPolicyShareCreateAttributes["display_name"], testResourceName, tf_api.Multitenancy),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyShareCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyShareCreateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -121,7 +122,7 @@ func TestAccResourceNsxtPolicyShare_multitenancy(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyShareWithMyselfTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyShareExists(accTestPolicyShareUpdateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyShareExists(accTestPolicyShareUpdateAttributes["display_name"], testResourceName, tf_api.Multitenancy),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyShareUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyShareUpdateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -134,7 +135,7 @@ func TestAccResourceNsxtPolicyShare_multitenancy(t *testing.T) {
 	})
 }
 
-func testAccNsxtPolicyShareExists(displayName string, resourceName string) resource.TestCheckFunc {
+func testAccNsxtPolicyShareExists(displayName string, resourceName string, clientType tf_api.ClientType) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
@@ -148,7 +149,7 @@ func testAccNsxtPolicyShareExists(displayName string, resourceName string) resou
 		if resourceID == "" {
 			return fmt.Errorf("Policy Share resource ID not set in resources")
 		}
-		exists, err := resourceNsxtPolicyShareExists(testAccGetSessionContext(), resourceID, connector)
+		exists, err := resourceNsxtPolicyShareExists(testAccGetContextByType(clientType), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -160,7 +161,7 @@ func testAccNsxtPolicyShareExists(displayName string, resourceName string) resou
 	}
 }
 
-func testAccNsxtPolicyShareCheckDestroy(state *terraform.State, displayName string) error {
+func testAccNsxtPolicyShareCheckDestroy(state *terraform.State, displayName string, clientType tf_api.ClientType) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 
@@ -169,7 +170,7 @@ func testAccNsxtPolicyShareCheckDestroy(state *terraform.State, displayName stri
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyShareExists(testAccGetSessionContext(), resourceID, connector)
+		exists, err := resourceNsxtPolicyShareExists(testAccGetContextByType(clientType), resourceID, connector)
 		if err == nil {
 			return err
 		}

@@ -60,7 +60,7 @@ data "nsxt_policy_segment_security_profile" "test" {
 }
 
 func testAccNsxtPolicySegmentSecurityProfileMultitenancyTemplate(name string) string {
-	context := testAccNsxtPolicyMultitenancyContext()
+	context := testAccNsxtProjectContext()
 	return fmt.Sprintf(`
 resource "nsxt_policy_segment_security_profile" "test" {
 %s

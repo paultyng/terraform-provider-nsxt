@@ -251,6 +251,21 @@ func testAccIsFabric() bool {
 	return os.Getenv("NSXT_TEST_FABRIC") != ""
 }
 
+func testAccGetContextByType(clientType tf_api.ClientType) tf_api.SessionContext {
+	if clientType == tf_api.Multitenancy {
+		projectID := os.Getenv("NSXT_PROJECT_ID")
+		return tf_api.SessionContext{ProjectID: projectID, ClientType: tf_api.Multitenancy}
+	} else if clientType == tf_api.VPC {
+		projectID := os.Getenv("NSXT_VPC_PROJECT_ID")
+		vpcID := os.Getenv("NSXT_VPC_ID")
+		return tf_api.SessionContext{ProjectID: projectID, ClientType: clientType, VPCID: vpcID}
+	}
+	if testAccIsGlobalManager() {
+		return tf_api.SessionContext{ClientType: tf_api.Global}
+	}
+	return tf_api.SessionContext{ClientType: tf_api.Local}
+}
+
 func testAccGetSessionContext() tf_api.SessionContext {
 	clientType := testAccIsGlobalManager2()
 	projectID := os.Getenv("NSXT_PROJECT_ID")
@@ -300,7 +315,7 @@ func testAccOnlyGlobalManager(t *testing.T) {
 }
 
 func testAccOnlyLocalManager(t *testing.T) {
-	if testAccIsGlobalManager() || testAccIsMultitenancy() {
+	if testAccIsGlobalManager() {
 		t.Skipf("This test requires a local manager environment")
 	}
 }

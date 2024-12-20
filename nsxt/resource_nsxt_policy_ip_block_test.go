@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -22,13 +23,13 @@ func TestAccResourceNsxtPolicyIPBlock_minimal(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXPolicyIPBlockCheckDestroy(state)
+			return testAccNSXPolicyIPBlockCheckDestroy(state, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNSXPolicyIPBlockCreateMinimalTemplate(name, cidr, false, false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXPolicyIPBlockCheckExists(testResourceName),
+					testAccNSXPolicyIPBlockCheckExists(testResourceName, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "cidr", cidr),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
@@ -68,18 +69,22 @@ func testAccResourceNsxtPolicyIPBlockBasic(t *testing.T, withContext bool, withV
 	testResourceName := "nsxt_policy_ip_block.test"
 	cidr := "192.168.1.0/24"
 	cidr2 := "191.166.1.0/24"
+	var clientType tf_api.ClientType = tf_api.Local
+	if withContext {
+		clientType = tf_api.Multitenancy
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXPolicyIPBlockCheckDestroy(state)
+			return testAccNSXPolicyIPBlockCheckDestroy(state, clientType)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNSXPolicyIPBlockCreateMinimalTemplate(name, cidr, withContext, withVisibility),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXPolicyIPBlockCheckExists(testResourceName),
+					testAccNSXPolicyIPBlockCheckExists(testResourceName, clientType),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "cidr", cidr),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
@@ -92,7 +97,7 @@ func testAccResourceNsxtPolicyIPBlockBasic(t *testing.T, withContext bool, withV
 			{
 				Config: testAccNSXPolicyIPBlockUpdateTemplate(name, cidr2, withContext, withVisibility),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXPolicyIPBlockCheckExists(testResourceName),
+					testAccNSXPolicyIPBlockCheckExists(testResourceName, clientType),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "cidr", cidr2),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
@@ -114,7 +119,7 @@ func TestAccResourceNsxtPolicyIPBlock_importBasic(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXPolicyIPBlockCheckDestroy(state)
+			return testAccNSXPolicyIPBlockCheckDestroy(state, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -137,7 +142,7 @@ func TestAccResourceNsxtPolicyIPBlock_importVisibility(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "4.2.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXPolicyIPBlockCheckDestroy(state)
+			return testAccNSXPolicyIPBlockCheckDestroy(state, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -160,7 +165,7 @@ func TestAccResourceNsxtPolicyIPBlock_importBasic_multitenancy(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXPolicyIPBlockCheckDestroy(state)
+			return testAccNSXPolicyIPBlockCheckDestroy(state, tf_api.Multitenancy)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -176,10 +181,10 @@ func TestAccResourceNsxtPolicyIPBlock_importBasic_multitenancy(t *testing.T) {
 	})
 }
 
-func testAccNSXPolicyIPBlockCheckExists(resourceName string) resource.TestCheckFunc {
+func testAccNSXPolicyIPBlockCheckExists(resourceName string, clientType tf_api.ClientType) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		client := infra.NewIpBlocksClient(testAccGetSessionContext(), connector)
+		client := infra.NewIpBlocksClient(testAccGetContextByType(clientType), connector)
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -212,9 +217,9 @@ func testAccNSXPolicyIPBlockVisibility(resourceName string, withVisibility bool,
 	return resource.TestCheckResourceAttr(resourceName, "visibility", expected)
 }
 
-func testAccNSXPolicyIPBlockCheckDestroy(state *terraform.State) error {
+func testAccNSXPolicyIPBlockCheckDestroy(state *terraform.State, clientType tf_api.ClientType) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	client := infra.NewIpBlocksClient(testAccGetSessionContext(), connector)
+	client := infra.NewIpBlocksClient(testAccGetContextByType(clientType), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -236,7 +241,7 @@ func testAccNSXPolicyIPBlockCheckDestroy(state *terraform.State) error {
 func testAccNSXPolicyIPBlockCreateMinimalTemplate(displayName string, cidr string, withContext, withVisibility bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtProjectContext()
 	}
 
 	visibility := ""
@@ -256,7 +261,7 @@ resource "nsxt_policy_ip_block" "test" {
 func testAccNSXPolicyIPBlockUpdateTemplate(displayName string, cidr string, withContext, withVisibility bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtProjectContext()
 	}
 
 	visibility := ""

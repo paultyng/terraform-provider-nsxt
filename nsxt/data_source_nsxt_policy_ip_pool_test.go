@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -31,17 +32,21 @@ func TestAccDataSourceNsxtPolicyIpPool_multitenancy(t *testing.T) {
 func testAccDataSourceNsxtPolicyIPPoolBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_ip_pool.test"
+	var clientType tf_api.ClientType = tf_api.Local
+	if withContext {
+		clientType = tf_api.Multitenancy
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccDataSourceNsxtPolicyIPPoolDeleteByName(name)
+			return testAccDataSourceNsxtPolicyIPPoolDeleteByName(name, clientType)
 		},
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					if err := testAccDataSourceNsxtPolicyIPPoolCreate(name); err != nil {
+					if err := testAccDataSourceNsxtPolicyIPPoolCreate(name, clientType); err != nil {
 						t.Error(err)
 					}
 				},
@@ -57,12 +62,12 @@ func testAccDataSourceNsxtPolicyIPPoolBasic(t *testing.T, withContext bool, preC
 	})
 }
 
-func testAccDataSourceNsxtPolicyIPPoolCreate(name string) error {
+func testAccDataSourceNsxtPolicyIPPoolCreate(name string, clientType tf_api.ClientType) error {
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewIpPoolsClient(testAccGetSessionContext(), connector)
+	client := infra.NewIpPoolsClient(testAccGetContextByType(clientType), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -84,12 +89,12 @@ func testAccDataSourceNsxtPolicyIPPoolCreate(name string) error {
 	return nil
 }
 
-func testAccDataSourceNsxtPolicyIPPoolDeleteByName(name string) error {
+func testAccDataSourceNsxtPolicyIPPoolDeleteByName(name string, clientType tf_api.ClientType) error {
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewIpPoolsClient(testAccGetSessionContext(), connector)
+	client := infra.NewIpPoolsClient(testAccGetContextByType(clientType), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -114,7 +119,7 @@ func testAccDataSourceNsxtPolicyIPPoolDeleteByName(name string) error {
 func testAccNsxtPolicyIPPoolReadTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtProjectContext()
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_ip_pool" "test" {

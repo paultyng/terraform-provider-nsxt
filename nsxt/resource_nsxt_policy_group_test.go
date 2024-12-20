@@ -2,6 +2,7 @@ package nsxt
 
 import (
 	"fmt"
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"regexp"
 	"testing"
 
@@ -19,7 +20,7 @@ func TestAccResourceNsxtPolicyGroup_basicImport(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -43,7 +44,7 @@ func TestAccResourceNsxtPolicyGroup_basicImport_multitenancy(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain, tf_api.Multitenancy)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -77,11 +78,15 @@ func testAccResourceNsxtPolicyGroupEmpty(t *testing.T, withContext bool, preChec
 	name := getAccTestResourceName()
 	resourceName := "nsxt_policy_group"
 
+	var clientType tf_api.ClientType = tf_api.Local
+	if withContext {
+		clientType = tf_api.Multitenancy
+	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain, clientType)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -110,17 +115,21 @@ func testAccResourceNsxtPolicyGroupAddressCriteria(t *testing.T, withContext boo
 	resourceName := "nsxt_policy_group"
 	testResourceName := fmt.Sprintf("%s.test", resourceName)
 
+	var clientType tf_api.ClientType = tf_api.Local
+	if withContext {
+		clientType = tf_api.Multitenancy
+	}
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain, clientType)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyGroupAddressCreateTemplate(name, resourceName, withContext),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, clientType),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
@@ -138,7 +147,7 @@ func testAccResourceNsxtPolicyGroupAddressCriteria(t *testing.T, withContext boo
 			{
 				Config: testAccNsxtPolicyGroupAddressUpdateTemplate(name, resourceName, withContext),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, clientType),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
@@ -168,14 +177,14 @@ func TestAccResourceNsxtPolicyGroup_groupTypeIPAddressCriteria(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyGroupIPAddressCreateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
-					testAccNsxtPolicyGroupExists(testResourceName2, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
+					testAccNsxtPolicyGroupExists(testResourceName2, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
@@ -192,7 +201,7 @@ func TestAccResourceNsxtPolicyGroup_groupTypeIPAddressCriteria(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyGroupIPAddressUpdateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
@@ -222,13 +231,13 @@ func TestAccResourceNsxtGlobalPolicyGroup_singleIPAddressCriteria(t *testing.T) 
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGroupCheckDestroy(state, updatedName, getTestSiteName())
+			return testAccNsxtPolicyGroupCheckDestroy(state, updatedName, getTestSiteName(), tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtGlobalPolicyGroupIPAddressCreateTemplate(name, getTestSiteName()),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, getTestSiteName()),
+					testAccNsxtPolicyGroupExists(testResourceName, getTestSiteName(), tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "domain", getTestSiteName()),
@@ -242,7 +251,7 @@ func TestAccResourceNsxtGlobalPolicyGroup_singleIPAddressCriteria(t *testing.T) 
 			{
 				Config: testAccNsxtGlobalPolicyGroupIPAddressUpdateTemplate(updatedName, getTestSiteName()),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, getTestSiteName()),
+					testAccNsxtPolicyGroupExists(testResourceName, getTestSiteName(), tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "domain", getTestSiteName()),
@@ -268,13 +277,13 @@ func TestAccResourceNsxtGlobalPolicyGroup_externalIDCriteria(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGroupCheckDestroy(state, updatedName, defaultDomain)
+			return testAccNsxtPolicyGroupCheckDestroy(state, updatedName, defaultDomain, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyGroupExternalIDCreateTemplate(name, defaultDomain),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
@@ -288,7 +297,7 @@ func TestAccResourceNsxtGlobalPolicyGroup_externalIDCriteria(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyGroupExternalIDUpdateTemplate(updatedName, defaultDomain),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
@@ -323,7 +332,7 @@ func TestAccResourceNsxtGlobalPolicyGroup_withDomain(t *testing.T) {
 			{
 				Config: testAccNsxtGlobalPolicyGroupCreateTemplateWithDomain(name, domainName, getTestSiteName()),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, domainName),
+					testAccNsxtPolicyGroupExists(testResourceName, domainName, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "domain", domainName),
@@ -347,13 +356,13 @@ func TestAccResourceNsxtPolicyGroup_multipleIPAddressCriteria(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGroupCheckDestroy(state, updatedName, defaultDomain)
+			return testAccNsxtPolicyGroupCheckDestroy(state, updatedName, defaultDomain, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyGroupIPAddressMultipleCreateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -367,7 +376,7 @@ func TestAccResourceNsxtPolicyGroup_multipleIPAddressCriteria(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyGroupIPAddressMultipleUpdateTemplate(updatedName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -393,13 +402,13 @@ func TestAccResourceNsxtPolicyGroup_pathCriteria(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyGroupPathsCreateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
@@ -414,7 +423,7 @@ func TestAccResourceNsxtPolicyGroup_pathCriteria(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyGroupPathsUpdateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
@@ -442,13 +451,13 @@ func TestAccResourceNsxtPolicyGroup_nestedCriteria(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGroupCheckDestroy(state, updatedName, defaultDomain)
+			return testAccNsxtPolicyGroupCheckDestroy(state, updatedName, defaultDomain, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyGroupNestedConditionCreateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -463,7 +472,7 @@ func TestAccResourceNsxtPolicyGroup_nestedCriteria(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyGroupNestedConditionUpdateTemplate(updatedName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -488,13 +497,13 @@ func TestAccResourceNsxtPolicyGroup_multipleCriteria(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGroupCheckDestroy(state, updatedName, defaultDomain)
+			return testAccNsxtPolicyGroupCheckDestroy(state, updatedName, defaultDomain, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyGroupMultipleConditionCreateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -510,7 +519,7 @@ func TestAccResourceNsxtPolicyGroup_multipleCriteria(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyGroupMultipleConditionUpdateTemplate(updatedName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -535,13 +544,13 @@ func TestAccResourceNsxtPolicyGroup_multipleNestedCriteria(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyGroupMultipleNestedCreateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -558,7 +567,7 @@ func TestAccResourceNsxtPolicyGroup_multipleNestedCriteria(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyGroupMultipleNestedUpdateTemplateDeleteIPAddrs(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -574,7 +583,7 @@ func TestAccResourceNsxtPolicyGroup_multipleNestedCriteria(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyGroupMultipleNestedUpdateTemplateDeleteNestedConds(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -590,7 +599,7 @@ func TestAccResourceNsxtPolicyGroup_multipleNestedCriteria(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyGroupMultipleNestedUpdateTemplateDeleteLastCriteria(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -615,13 +624,13 @@ func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGroupCheckDestroy(state, updatedName, defaultDomain)
+			return testAccNsxtPolicyGroupCheckDestroy(state, updatedName, defaultDomain, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyGroupIdentityGroup(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -639,7 +648,7 @@ func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyGroupIdentityGroupUpdateChangeAD(updatedName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -658,7 +667,7 @@ func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyGroupIdentityGroupUpdateMultipleAD(updatedName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -680,7 +689,7 @@ func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyGroupIdentityGroupUpdateDeleteAD(updatedName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain, tf_api.Local),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -696,7 +705,7 @@ func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
 	})
 }
 
-func testAccNsxtPolicyGroupExists(resourceName string, domainName string) resource.TestCheckFunc {
+func testAccNsxtPolicyGroupExists(resourceName string, domainName string, clientType tf_api.ClientType) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
@@ -711,7 +720,7 @@ func testAccNsxtPolicyGroupExists(resourceName string, domainName string) resour
 			return fmt.Errorf("Policy Group resource ID not set in resources")
 		}
 
-		nsxClient := domains.NewGroupsClient(testAccGetSessionContext(), connector)
+		nsxClient := domains.NewGroupsClient(testAccGetContextByType(clientType), connector)
 		if nsxClient == nil {
 			return policyResourceNotSupportedError()
 		}
@@ -724,7 +733,7 @@ func testAccNsxtPolicyGroupExists(resourceName string, domainName string) resour
 	}
 }
 
-func testAccNsxtPolicyGroupCheckDestroy(state *terraform.State, displayName string, domainName string) error {
+func testAccNsxtPolicyGroupCheckDestroy(state *terraform.State, displayName string, domainName string, clientType tf_api.ClientType) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 
 	for _, rs := range state.RootModule().Resources {
@@ -744,7 +753,7 @@ func testAccNsxtPolicyGroupCheckDestroy(state *terraform.State, displayName stri
 				return fmt.Errorf("Error while retrieving policy domain %s. Error: %v", domainName, errDomain)
 			}
 		}
-		exists, err := resourceNsxtPolicyGroupExistsInDomain(testAccGetSessionContext(), resourceID, domainID, connector)
+		exists, err := resourceNsxtPolicyGroupExistsInDomain(testAccGetContextByType(clientType), resourceID, domainID, connector)
 		if err != nil {
 			return err
 		}

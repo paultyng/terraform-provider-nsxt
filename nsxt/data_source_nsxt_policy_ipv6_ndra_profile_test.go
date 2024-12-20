@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -30,17 +31,21 @@ func TestAccDataSourceNsxtPolicyIpv6NdraProfile_multitenancy(t *testing.T) {
 func testAccDataSourceNsxtPolicyIpv6NdraProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_ipv6_ndra_profile.test"
+	var clientType tf_api.ClientType = tf_api.Local
+	if withContext {
+		clientType = tf_api.Multitenancy
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccDataSourceNsxtPolicyIpv6NdraProfileDeleteByName(name)
+			return testAccDataSourceNsxtPolicyIpv6NdraProfileDeleteByName(name, clientType)
 		},
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					if err := testAccDataSourceNsxtPolicyIpv6NdraProfileCreate(name); err != nil {
+					if err := testAccDataSourceNsxtPolicyIpv6NdraProfileCreate(name, clientType); err != nil {
 						t.Error(err)
 					}
 				},
@@ -55,7 +60,7 @@ func testAccDataSourceNsxtPolicyIpv6NdraProfileBasic(t *testing.T, withContext b
 	})
 }
 
-func testAccDataSourceNsxtPolicyIpv6NdraProfileCreate(name string) error {
+func testAccDataSourceNsxtPolicyIpv6NdraProfileCreate(name string, clientType tf_api.ClientType) error {
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
@@ -75,7 +80,7 @@ func testAccDataSourceNsxtPolicyIpv6NdraProfileCreate(name string) error {
 	// Generate a random ID for the resource
 	id := newUUID()
 
-	client := infra.NewIpv6NdraProfilesClient(testAccGetSessionContext(), connector)
+	client := infra.NewIpv6NdraProfilesClient(testAccGetContextByType(clientType), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -86,13 +91,13 @@ func testAccDataSourceNsxtPolicyIpv6NdraProfileCreate(name string) error {
 	return nil
 }
 
-func testAccDataSourceNsxtPolicyIpv6NdraProfileDeleteByName(name string) error {
+func testAccDataSourceNsxtPolicyIpv6NdraProfileDeleteByName(name string, clientType tf_api.ClientType) error {
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
 	// Find the object by name and delete it
-	client := infra.NewIpv6NdraProfilesClient(testAccGetSessionContext(), connector)
+	client := infra.NewIpv6NdraProfilesClient(testAccGetContextByType(clientType), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

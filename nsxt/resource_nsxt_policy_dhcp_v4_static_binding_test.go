@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"strings"
 	"testing"
 
@@ -77,18 +78,22 @@ func TestAccResourceNsxtPolicyDhcpV4StaticBinding_fixedSegment_multitenancy(t *t
 
 func testAccResourceNsxtPolicyDhcpV4StaticBindingBasic(t *testing.T, isFixed, withContext bool, preCheck func()) {
 	testResourceName := testAccPolicyDhcpV4StaticBindingResourceName
+	var clientType tf_api.ClientType = tf_api.Local
+	if withContext {
+		clientType = tf_api.Multitenancy
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyDhcpV4StaticBindingCheckDestroy(state, accTestPolicyDhcpV4StaticBindingCreateAttributes["display_name"])
+			return testAccNsxtPolicyDhcpV4StaticBindingCheckDestroy(state, accTestPolicyDhcpV4StaticBindingCreateAttributes["display_name"], clientType)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyDhcpV4StaticBindingTemplate(isFixed, true, withContext),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyDhcpV4StaticBindingExists(accTestPolicyDhcpV4StaticBindingCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyDhcpV4StaticBindingExists(accTestPolicyDhcpV4StaticBindingCreateAttributes["display_name"], testResourceName, clientType),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyDhcpV4StaticBindingCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyDhcpV4StaticBindingCreateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "gateway_address", accTestPolicyDhcpV4StaticBindingCreateAttributes["gateway_address"]),
@@ -106,7 +111,7 @@ func testAccResourceNsxtPolicyDhcpV4StaticBindingBasic(t *testing.T, isFixed, wi
 			{
 				Config: testAccNsxtPolicyDhcpV4StaticBindingTemplate(isFixed, false, withContext),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyDhcpV4StaticBindingExists(accTestPolicyDhcpV4StaticBindingUpdateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyDhcpV4StaticBindingExists(accTestPolicyDhcpV4StaticBindingUpdateAttributes["display_name"], testResourceName, clientType),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyDhcpV4StaticBindingUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyDhcpV4StaticBindingUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "gateway_address", accTestPolicyDhcpV4StaticBindingUpdateAttributes["gateway_address"]),
@@ -124,7 +129,7 @@ func testAccResourceNsxtPolicyDhcpV4StaticBindingBasic(t *testing.T, isFixed, wi
 			{
 				Config: testAccNsxtPolicyDhcpV4StaticBindingMinimalistic(isFixed, withContext),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyDhcpV4StaticBindingExists(accTestPolicyDhcpV4StaticBindingCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyDhcpV4StaticBindingExists(accTestPolicyDhcpV4StaticBindingCreateAttributes["display_name"], testResourceName, clientType),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -143,7 +148,7 @@ func TestAccResourceNsxtPolicyDhcpV4StaticBinding_importBasic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyDhcpV4StaticBindingCheckDestroy(state, name)
+			return testAccNsxtPolicyDhcpV4StaticBindingCheckDestroy(state, name, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -166,7 +171,7 @@ func TestAccResourceNsxtPolicyDhcpV4StaticBinding_importBasic_multitenancy(t *te
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyDhcpV4StaticBindingCheckDestroy(state, name)
+			return testAccNsxtPolicyDhcpV4StaticBindingCheckDestroy(state, name, tf_api.Multitenancy)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -182,7 +187,7 @@ func TestAccResourceNsxtPolicyDhcpV4StaticBinding_importBasic_multitenancy(t *te
 	})
 }
 
-func testAccNsxtPolicyDhcpV4StaticBindingExists(displayName string, resourceName string) resource.TestCheckFunc {
+func testAccNsxtPolicyDhcpV4StaticBindingExists(displayName string, resourceName string, clientType tf_api.ClientType) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
@@ -198,7 +203,7 @@ func testAccNsxtPolicyDhcpV4StaticBindingExists(displayName string, resourceName
 			return fmt.Errorf("Policy DhcpV4StaticBinding resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(testAccGetSessionContext(), resourceID, segmentPath, connector)
+		exists, err := resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(testAccGetContextByType(clientType), resourceID, segmentPath, connector)
 		if err != nil {
 			return err
 		}
@@ -210,7 +215,7 @@ func testAccNsxtPolicyDhcpV4StaticBindingExists(displayName string, resourceName
 	}
 }
 
-func testAccNsxtPolicyDhcpV4StaticBindingCheckDestroy(state *terraform.State, displayName string) error {
+func testAccNsxtPolicyDhcpV4StaticBindingCheckDestroy(state *terraform.State, displayName string, clientType tf_api.ClientType) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 
@@ -220,7 +225,7 @@ func testAccNsxtPolicyDhcpV4StaticBindingCheckDestroy(state *terraform.State, di
 
 		resourceID := rs.Primary.Attributes["id"]
 		segmentPath := rs.Primary.Attributes["segment_path"]
-		exists, err := resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(testAccGetSessionContext(), resourceID, segmentPath, connector)
+		exists, err := resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(testAccGetContextByType(clientType), resourceID, segmentPath, connector)
 		if err == nil {
 			return err
 		}
@@ -268,7 +273,7 @@ func testAccNsxtPolicyDhcpStaticBindingPrerequisites(isFixed, isIpv6, withContex
 	defsSpec := testAccNsxtPolicyGatewayFabricDeps(false)
 	edgeClusterSpec := "data.nsxt_policy_edge_cluster.EC.path"
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtProjectContext()
 		tzSpec = ""
 		defsSpec, edgeClusterSpec = testAccNsxtPolicyProjectSpec()
 	}

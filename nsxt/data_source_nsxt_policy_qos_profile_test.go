@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -30,17 +31,21 @@ func TestAccDataSourceNsxtPolicyQosProfile_multitenancy(t *testing.T) {
 func testAccDataSourceNsxtPolicyQosProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_qos_profile.test"
+	var clientType tf_api.ClientType = tf_api.Local
+	if withContext {
+		clientType = tf_api.Multitenancy
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccDataSourceNsxtPolicyQosProfileDeleteByName(name)
+			return testAccDataSourceNsxtPolicyQosProfileDeleteByName(name, clientType)
 		},
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					if err := testAccDataSourceNsxtPolicyQosProfileCreate(name); err != nil {
+					if err := testAccDataSourceNsxtPolicyQosProfileCreate(name, clientType); err != nil {
 						t.Error(err)
 					}
 				},
@@ -55,7 +60,7 @@ func testAccDataSourceNsxtPolicyQosProfileBasic(t *testing.T, withContext bool, 
 	})
 }
 
-func testAccDataSourceNsxtPolicyQosProfileCreate(name string) error {
+func testAccDataSourceNsxtPolicyQosProfileCreate(name string, clientType tf_api.ClientType) error {
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
@@ -71,7 +76,7 @@ func testAccDataSourceNsxtPolicyQosProfileCreate(name string) error {
 	// Generate a random ID for the resource
 	id := newUUID()
 
-	client := infra.NewQosProfilesClient(testAccGetSessionContext(), connector)
+	client := infra.NewQosProfilesClient(testAccGetContextByType(clientType), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -83,14 +88,14 @@ func testAccDataSourceNsxtPolicyQosProfileCreate(name string) error {
 	return nil
 }
 
-func testAccDataSourceNsxtPolicyQosProfileDeleteByName(name string) error {
+func testAccDataSourceNsxtPolicyQosProfileDeleteByName(name string, clientType tf_api.ClientType) error {
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
 
 	// Find the object by name and delete it
-	client := infra.NewQosProfilesClient(testAccGetSessionContext(), connector)
+	client := infra.NewQosProfilesClient(testAccGetContextByType(clientType), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -113,7 +118,7 @@ func testAccDataSourceNsxtPolicyQosProfileDeleteByName(name string) error {
 func testAccNsxtPolicyQosProfileReadTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtProjectContext()
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_qos_profile" "test" {

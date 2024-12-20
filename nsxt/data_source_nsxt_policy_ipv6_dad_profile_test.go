@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -30,17 +31,21 @@ func TestAccDataSourceNsxtPolicyIpv6DadProfile_multitenancy(t *testing.T) {
 func testAccDataSourceNsxtPolicyIpv6DadProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_ipv6_dad_profile.test"
+	var clientType tf_api.ClientType = tf_api.Local
+	if withContext {
+		clientType = tf_api.Multitenancy
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccDataSourceNsxtPolicyIpv6DadProfileDeleteByName(name)
+			return testAccDataSourceNsxtPolicyIpv6DadProfileDeleteByName(name, clientType)
 		},
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					if err := testAccDataSourceNsxtPolicyIpv6DadProfileCreate(name); err != nil {
+					if err := testAccDataSourceNsxtPolicyIpv6DadProfileCreate(name, clientType); err != nil {
 						t.Error(err)
 					}
 				},
@@ -55,7 +60,7 @@ func testAccDataSourceNsxtPolicyIpv6DadProfileBasic(t *testing.T, withContext bo
 	})
 }
 
-func testAccDataSourceNsxtPolicyIpv6DadProfileCreate(name string) error {
+func testAccDataSourceNsxtPolicyIpv6DadProfileCreate(name string, clientType tf_api.ClientType) error {
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
@@ -70,7 +75,7 @@ func testAccDataSourceNsxtPolicyIpv6DadProfileCreate(name string) error {
 
 	// Generate a random ID for the resource
 	id := newUUID()
-	client := infra.NewIpv6DadProfilesClient(testAccGetSessionContext(), connector)
+	client := infra.NewIpv6DadProfilesClient(testAccGetContextByType(clientType), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -82,13 +87,13 @@ func testAccDataSourceNsxtPolicyIpv6DadProfileCreate(name string) error {
 	return nil
 }
 
-func testAccDataSourceNsxtPolicyIpv6DadProfileDeleteByName(name string) error {
+func testAccDataSourceNsxtPolicyIpv6DadProfileDeleteByName(name string, clientType tf_api.ClientType) error {
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
 	// Find the object by name and delete it
-	client := infra.NewIpv6DadProfilesClient(testAccGetSessionContext(), connector)
+	client := infra.NewIpv6DadProfilesClient(testAccGetContextByType(clientType), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -113,7 +118,7 @@ func testAccDataSourceNsxtPolicyIpv6DadProfileDeleteByName(name string) error {
 func testAccNsxtPolicyIpv6DadProfileReadTemplate(name string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtProjectContext()
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_ipv6_dad_profile" "test" {

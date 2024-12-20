@@ -2,6 +2,7 @@ package nsxt
 
 import (
 	"fmt"
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -277,12 +278,12 @@ func TestAccResourceNsxtPolicySegment_withProfiles(t *testing.T) {
 				return err
 			}
 
-			return testAccDataSourceNsxtPolicyQosProfileDeleteByName(testAccSegmentQosProfileName)
+			return testAccDataSourceNsxtPolicyQosProfileDeleteByName(testAccSegmentQosProfileName, tf_api.Local)
 		},
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					if err := testAccDataSourceNsxtPolicyQosProfileCreate(testAccSegmentQosProfileName); err != nil {
+					if err := testAccDataSourceNsxtPolicyQosProfileCreate(testAccSegmentQosProfileName, tf_api.Local); err != nil {
 						t.Error(err)
 					}
 				},
