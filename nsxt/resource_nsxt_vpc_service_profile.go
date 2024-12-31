@@ -240,6 +240,8 @@ var vpcServiceProfileSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
+var vpcServiceProfilePathExample = "/orgs/[org]/projects/[project]/vpc-service-profiles/[profile]"
+
 func resourceNsxtVpcServiceProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVpcServiceProfileCreate,
@@ -247,7 +249,7 @@ func resourceNsxtVpcServiceProfile() *schema.Resource {
 		Update: resourceNsxtVpcServiceProfileUpdate,
 		Delete: resourceNsxtVpcServiceProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathResourceImporter("/orgs/[org]/projects/[project]/vpc-service-profiles/[profile]"),
+			State: getPolicyPathResourceImporter(vpcServiceProfilePathExample),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcServiceProfileSchema),
 	}

@@ -18,7 +18,13 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
-var rateLimiterResourceTypes = []string{model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSRATELIMITER, model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSBROADCASTRATELIMITER, model.QosBaseRateLimiter_RESOURCE_TYPE_EGRESSRATELIMITER}
+var rateLimiterResourceTypes = []string{
+	model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSRATELIMITER,
+	model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSBROADCASTRATELIMITER,
+	model.QosBaseRateLimiter_RESOURCE_TYPE_EGRESSRATELIMITER,
+}
+
+var qosProfilePathExample = getMultitenancyPathExample("/infra/qos-profiles/[profile]")
 
 func resourceNsxtPolicyQosProfile() *schema.Resource {
 	return &schema.Resource{
@@ -27,7 +33,7 @@ func resourceNsxtPolicyQosProfile() *schema.Resource {
 		Update: resourceNsxtPolicyQosProfileUpdate,
 		Delete: resourceNsxtPolicyQosProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/qos-profiles/[profile]")),
+			State: getPolicyPathOrIDResourceImporter(qosProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

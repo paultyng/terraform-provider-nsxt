@@ -17,6 +17,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
 
+var transitGatewayNatPathExample = "/orgs/[org]/projects/[project]/transit-gateways/[gateway]/nat/[type]"
+
 func resourceNsxtPolicyTransitGatewayNatRule() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyTransitGatewayNatRuleCreate,
@@ -34,7 +36,7 @@ func resourceNsxtPolicyTransitGatewayNatRule() *schema.Resource {
 
 func resourceNsxtPolicyTransitGatewayNatRuleExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
 	var err error
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, transitGatewayNatPathExample)
 	if pathErr != nil {
 		return false, pathErr
 	}
@@ -60,7 +62,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleCreate(d *schema.ResourceData, m int
 	}
 
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, transitGatewayNatPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -102,7 +104,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleRead(d *schema.ResourceData, m inter
 
 	client := clientLayer.NewNatRulesClient(connector)
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, transitGatewayNatPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -132,7 +134,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleUpdate(d *schema.ResourceData, m int
 	}
 
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, transitGatewayNatPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -170,7 +172,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleDelete(d *schema.ResourceData, m int
 
 	connector := getPolicyConnector(m)
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, transitGatewayNatPathExample)
 	if pathErr != nil {
 		return pathErr
 	}

@@ -15,6 +15,8 @@ import (
 
 var cryptoProtocolsValues = []string{"TLS_V1", "TLS_V1_1", "TLS_V1_2"}
 
+var metadataProxyPathExample = getMultitenancyPathExample("/infra/metadata-proxies/[profile]")
+
 func resourceNsxtPolicyMetadataProxy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyMetadataProxyCreate,
@@ -22,7 +24,7 @@ func resourceNsxtPolicyMetadataProxy() *schema.Resource {
 		Update: resourceNsxtPolicyMetadataProxyUpdate,
 		Delete: resourceNsxtPolicyMetadataProxyDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/metadata-proxies/[profile]")),
+			State: getPolicyPathOrIDResourceImporter(metadataProxyPathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

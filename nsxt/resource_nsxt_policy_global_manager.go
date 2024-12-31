@@ -18,6 +18,8 @@ var globalManagerModeValues = []string{
 	gm_model.GlobalManager_MODE_STANDBY,
 }
 
+var globalManagerPathExample = "/global-infra/global-managers/[manager]"
+
 func resourceNsxtPolicyGlobalManager() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyGlobalManagerCreate,
@@ -25,7 +27,7 @@ func resourceNsxtPolicyGlobalManager() *schema.Resource {
 		Update: resourceNsxtPolicyGlobalManagerUpdate,
 		Delete: resourceNsxtPolicyGlobalManagerDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter("/global-infra/global-managers/[manager]"),
+			State: getPolicyPathOrIDResourceImporter(globalManagerPathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

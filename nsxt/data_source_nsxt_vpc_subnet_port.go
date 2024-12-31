@@ -38,10 +38,12 @@ func dataSourceNsxtVpcSubnetPort() *schema.Resource {
 	}
 }
 
+var vpcSubnetPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/subnets/[subnet]"
+
 func listVpcSubnetPorts(connector client.Connector, subnetPath string) ([]model.VpcSubnetPort, error) {
 
 	var results []model.VpcSubnetPort
-	parents, pathErr := parseStandardPolicyPathVerifySize(subnetPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(subnetPath, 4, vpcSubnetPathExample)
 	if pathErr != nil {
 		return results, pathErr
 	}

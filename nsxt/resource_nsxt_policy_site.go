@@ -18,6 +18,8 @@ var siteTypeValues = []string{
 	gm_model.Site_SITE_TYPE_SDDC_LM,
 }
 
+var sitePathExample = "/infra/sites/[site]"
+
 func resourceNsxtPolicySite() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicySiteCreate,
@@ -25,7 +27,7 @@ func resourceNsxtPolicySite() *schema.Resource {
 		Update: resourceNsxtPolicySiteUpdate,
 		Delete: resourceNsxtPolicySiteDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter("/infra/sites/[site]"),
+			State: getPolicyPathOrIDResourceImporter(sitePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

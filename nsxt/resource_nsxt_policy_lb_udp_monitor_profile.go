@@ -21,7 +21,7 @@ func resourceNsxtPolicyLBUdpMonitorProfile() *schema.Resource {
 		Update: resourceNsxtPolicyLBUdpMonitorProfileUpdate,
 		Delete: resourceNsxtPolicyLBUdpMonitorProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter("/infra/lb-monitor-profiles/[profile]"),
+			State: getPolicyPathOrIDResourceImporter(lbMonitorProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

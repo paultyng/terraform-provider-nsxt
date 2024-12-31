@@ -66,6 +66,8 @@ var projectIpAddressAllocationSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
+var projectIpAddressAllocationPathExample = "/orgs/[org]/projects/[project]/ip-address-allocations/[allocation]"
+
 func resourceNsxtPolicyProjectIpAddressAllocation() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyProjectIpAddressAllocationCreate,
@@ -73,7 +75,7 @@ func resourceNsxtPolicyProjectIpAddressAllocation() *schema.Resource {
 		Update: resourceNsxtPolicyProjectIpAddressAllocationUpdate,
 		Delete: resourceNsxtPolicyProjectIpAddressAllocationDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathResourceImporter("/orgs/[org]/projects/[project]/ip-address-allocations/[allocation]"),
+			State: getPolicyPathResourceImporter(projectIpAddressAllocationPathExample),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(projectIpAddressAllocationSchema),
 	}

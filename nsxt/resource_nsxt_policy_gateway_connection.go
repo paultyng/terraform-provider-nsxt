@@ -73,6 +73,8 @@ var gatewayConnectionSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
+var gatewayConnectionPathExample = "/infra/gateway-connections/[connection]"
+
 func resourceNsxtPolicyGatewayConnection() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyGatewayConnectionCreate,
@@ -80,7 +82,7 @@ func resourceNsxtPolicyGatewayConnection() *schema.Resource {
 		Update: resourceNsxtPolicyGatewayConnectionUpdate,
 		Delete: resourceNsxtPolicyGatewayConnectionDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathResourceImporter("/infra/gateway-connections/[connection]"),
+			State: getPolicyPathResourceImporter(gatewayConnectionPathExample),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(gatewayConnectionSchema),
 	}

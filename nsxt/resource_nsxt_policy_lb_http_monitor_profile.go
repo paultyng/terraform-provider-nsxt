@@ -14,6 +14,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var lbMonitorProfilePathExample = "/infra/lb-monitor-profiles/[profile]"
+
 func resourceNsxtPolicyLBHttpMonitorProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyLBHttpMonitorProfileCreate,
@@ -21,7 +23,7 @@ func resourceNsxtPolicyLBHttpMonitorProfile() *schema.Resource {
 		Update: resourceNsxtPolicyLBHttpMonitorProfileUpdate,
 		Delete: resourceNsxtPolicyLBHttpMonitorProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter("/infra/lb-monitor-profiles/[profile]"),
+			State: getPolicyPathOrIDResourceImporter(lbMonitorProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

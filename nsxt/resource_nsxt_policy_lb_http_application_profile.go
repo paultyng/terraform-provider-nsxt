@@ -21,6 +21,8 @@ var lBHttpProfileXForwardedForValues = []string{
 	model.LBHttpProfile_X_FORWARDED_FOR_INSERT,
 }
 
+var lbHttpApplucationProfilePathExample = "/infra/lb-app-profiles/[profile]"
+
 func resourceNsxtPolicyLBHttpApplicationProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyLBHttpApplicationProfileCreate,
@@ -28,7 +30,7 @@ func resourceNsxtPolicyLBHttpApplicationProfile() *schema.Resource {
 		Update: resourceNsxtPolicyLBHttpApplicationProfileUpdate,
 		Delete: resourceNsxtPolicyLBHttpApplicationProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter("/infra/lb-app-profiles/[profile]"),
+			State: getPolicyPathOrIDResourceImporter(lbHttpApplucationProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

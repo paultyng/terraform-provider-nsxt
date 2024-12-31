@@ -11,6 +11,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 )
 
+var vpcSecurityPolicyPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/security-policies/[security-policy]"
+
 func resourceNsxtVPCSecurityPolicy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVPCSecurityPolicyCreate,
@@ -18,7 +20,7 @@ func resourceNsxtVPCSecurityPolicy() *schema.Resource {
 		Update: resourceNsxtVPCSecurityPolicyUpdate,
 		Delete: resourceNsxtVPCSecurityPolicyDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyVpcPathResourceImporter("/orgs/[org]/projects/[project]/vpcs/[vpc]/security-policies/[security-policy]"),
+			State: getVpcPathResourceImporter(vpcSecurityPolicyPathExample),
 		},
 		Schema: getPolicySecurityPolicySchema(false, true, true, true),
 	}

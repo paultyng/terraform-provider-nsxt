@@ -16,6 +16,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var ipDiscoveryProfilePathExample = getMultitenancyPathExample("/infra/ip-discovery-profiles/[profile]")
+
 func resourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyIPDiscoveryProfileCreate,
@@ -23,7 +25,7 @@ func resourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
 		Update: resourceNsxtPolicyIPDiscoveryProfileUpdate,
 		Delete: resourceNsxtPolicyIPDiscoveryProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/ip-discovery-profiles/[profile]")),
+			State: getPolicyPathOrIDResourceImporter(ipDiscoveryProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

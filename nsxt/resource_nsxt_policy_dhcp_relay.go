@@ -15,6 +15,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var dhcpRelayPathExample = getMultitenancyPathExample("/infra/dhcp-relays/[dhcp-relay]")
+
 func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyDhcpRelayConfigCreate,
@@ -22,7 +24,7 @@ func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
 		Update: resourceNsxtPolicyDhcpRelayConfigUpdate,
 		Delete: resourceNsxtPolicyDhcpRelayConfigDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/dhcp-relays/[dhcp-relay]")),
+			State: getPolicyPathOrIDResourceImporter(dhcpRelayPathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

@@ -15,6 +15,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var spoofGuardProfilePathExample = getMultitenancyPathExample("/infra/spoofguard-profiles/[profile]")
+
 func resourceNsxtPolicySpoofGuardProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicySpoofGuardProfileCreate,
@@ -22,7 +24,7 @@ func resourceNsxtPolicySpoofGuardProfile() *schema.Resource {
 		Update: resourceNsxtPolicySpoofGuardProfileUpdate,
 		Delete: resourceNsxtPolicySpoofGuardProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/spoofguard-profiles/[profile]")),
+			State: getPolicyPathOrIDResourceImporter(spoofGuardProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

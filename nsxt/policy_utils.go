@@ -343,13 +343,13 @@ func parseStandardPolicyPath(path string) ([]string, error) {
 	return parents, nil
 }
 
-func parseStandardPolicyPathVerifySize(path string, expectedSize int) ([]string, error) {
+func parseStandardPolicyPathVerifySize(path string, expectedSize int, pathExample string) ([]string, error) {
 	parents, err := parseStandardPolicyPath(path)
 	if err != nil {
 		return parents, err
 	}
 	if len(parents) != expectedSize {
-		return parents, fmt.Errorf("Unexpected parent path %s (expected %d parent ids, got %d)", path, expectedSize, len(parents))
+		return parents, fmt.Errorf("Unexpected parent path %s (expected format %s)", path, pathExample)
 	}
 
 	return parents, nil
@@ -425,7 +425,7 @@ func isValidResourceID(id string) bool {
 }
 
 // This importer function accepts policy path only as import ID
-func getFriendlyPolicyPathResourceImporter(pathExample string) func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func getPolicyPathResourceImporter(pathExample string) func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	return func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 		rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
 		if errors.Is(err, ErrNotAPolicyPath) || errors.Is(err, ErrUnexpectedPolicyPath) {
@@ -453,7 +453,7 @@ func getMultitenancyPathExample(pathExample string) string {
 }
 
 // This importer function accepts policy path or resource ID
-func getFriendlyPolicyPathOrIDResourceImporter(pathExample string) func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func getPolicyPathOrIDResourceImporter(pathExample string) func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	return func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 		rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
 		if errors.Is(err, ErrUnexpectedPolicyPath) {
@@ -461,7 +461,7 @@ func getFriendlyPolicyPathOrIDResourceImporter(pathExample string) func(d *schem
 		}
 		if errors.Is(err, ErrNotAPolicyPath) {
 			if !isValidResourceID(d.Id()) {
-				return rd, fmt.Errorf("Invalid policy path or id %s; expected path format: %s", d.Id(), pathExample)
+				return rd, fmt.Errorf("Invalid policy path or id %s; when importing with path, expected format is %s", d.Id(), pathExample)
 			}
 			return rd, nil
 		} else if err != nil {
@@ -472,7 +472,7 @@ func getFriendlyPolicyPathOrIDResourceImporter(pathExample string) func(d *schem
 }
 
 // This importer function accepts VPC path only
-func getFriendlyVpcPathResourceImporter(pathExample string) func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func getVpcPathResourceImporter(pathExample string) func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	return func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 		rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
 		if errors.Is(err, ErrNotAPolicyPath) || errors.Is(err, ErrUnexpectedPolicyPath) {
@@ -483,6 +483,7 @@ func getFriendlyVpcPathResourceImporter(pathExample string) func(d *schema.Resou
 			return rd, err
 		}
 
+		// verify that both project and vpc were set in schema by the improter helper above
 		projectID, vpcID := getContextDataFromSchema(d)
 		if projectID == "" || vpcID == "" {
 			return rd, fmt.Errorf("imported resource policy path should have both project_id and vpc_id fields")
