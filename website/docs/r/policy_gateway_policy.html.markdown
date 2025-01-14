@@ -152,6 +152,30 @@ The following arguments are supported:
   * `profiles` - (Optional) A list of context profiles for the rule. Note: due to platform issue, this setting is only supported with NSX 3.2 onwards.
   * `scope` - (Required) List of policy paths where the rule is applied.
   * `services` - (Optional) List of services to match.
+  * `service_entries` - (Optional) Set of explicit protocol/port service definition
+    * `icmp_entry` - (Optional) Set of ICMP type service entries
+      * `display_name` - (Optional) Display name of the service entry
+      * `protocol` - (Required) Version of ICMP protocol: `ICMPv4` or `ICMPv6`
+      * `icmp_code` - (Optional) ICMP message code
+      * `icmp_type` - (Optional) ICMP message type
+    * `l4_port_set_entry` - (Optional) Set of L4 ports set service entries
+      * `display_name` - (Optional) Display name of the service entry
+      * `protocol` - (Required) L4 protocol: `TCP` or `UDP`
+      * `destination_ports` - (Optional) Set of destination ports
+      * `source_ports` - (Optional) Set of source ports
+    * `igmp_entry` - (Optional) Set of IGMP type service entries
+      * `display_name` - (Optional) Display name of the service entry
+    * `ether_type_entry` - (Optional) Set of Ether type service entries
+      * `display_name` - (Optional) Display name of the service entry
+      * `ether_type` - (Required) Type of the encapsulated protocol
+    * `ip_protocol_entry` - (Optional) Set of IP Protocol type service entries
+      * `display_name` - (Optional) Display name of the service entry
+      * `protocol` - (Required) IP protocol number
+    * `algorithm_entry` - (Optional) Set of Algorithm type service entries
+      * `display_name` - (Optional) Display name of the service entry
+      * `destination_port` - (Required) a single destination port
+      * `source_ports` - (Optional) Set of source ports/ranges
+      * `algorithm` - (Required) Algorithm: `FTP` or `TFTP`
   * `source_groups` - (Optional) Set of group paths that serve as the source for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
   * `source_excluded` - (Optional) A boolean value indicating negation of source groups.
   * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.

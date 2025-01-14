@@ -19,6 +19,185 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+func getIcmpEntrySchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "ICMP type service entry",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"display_name": getOptionalDisplayNameSchema(false),
+				"description":  getDescriptionSchema(),
+				"protocol": {
+					Type:         schema.TypeString,
+					Description:  "Version of ICMP protocol (ICMPv4/ICMPv6)",
+					Required:     true,
+					ValidateFunc: validation.StringInSlice(icmpProtocolValues, false),
+				},
+				"icmp_type": {
+					// NOTE: icmp_type is required if icmp_code is set
+					Type:         schema.TypeString,
+					Description:  "ICMP message type",
+					Optional:     true,
+					ValidateFunc: validateStringIntBetween(0, 255),
+				},
+				"icmp_code": {
+					Type:         schema.TypeString,
+					Description:  "ICMP message code",
+					Optional:     true,
+					ValidateFunc: validateStringIntBetween(0, 255),
+				},
+			},
+		},
+	}
+}
+
+func getL4PortSetEntrySchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "L4 port set type service entry",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"display_name": getOptionalDisplayNameSchema(false),
+				"description":  getDescriptionSchema(),
+				"destination_ports": {
+					Type:        schema.TypeSet,
+					Description: "Set of destination ports",
+					Elem: &schema.Schema{
+						Type:         schema.TypeString,
+						ValidateFunc: validatePortRange(),
+					},
+					Optional: true,
+				},
+				"source_ports": {
+					Type:        schema.TypeSet,
+					Description: "Set of source ports",
+					Elem: &schema.Schema{
+						Type:         schema.TypeString,
+						ValidateFunc: validatePortRange(),
+					},
+					Optional: true,
+				},
+				"protocol": {
+					Type:         schema.TypeString,
+					Description:  "L4 Protocol",
+					Required:     true,
+					ValidateFunc: validation.StringInSlice(protocolValues, false),
+				},
+			},
+		},
+	}
+}
+
+func getIgmpEntrySchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "IGMP type service entry",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"display_name": getOptionalDisplayNameSchema(false),
+				"description":  getDescriptionSchema(),
+			},
+		},
+	}
+}
+
+func getEtherEntrySchema(addConflictDef bool) *schema.Schema {
+	s := &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Ether type service entry",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"display_name": getOptionalDisplayNameSchema(false),
+				"description":  getDescriptionSchema(),
+				"ether_type": {
+					Type:        schema.TypeInt,
+					Description: "Type of the encapsulated protocol",
+					Required:    true,
+				},
+			},
+		},
+	}
+	if addConflictDef {
+		s.ConflictsWith = []string{"algorithm_entry", "igmp_entry", "icmp_entry", "l4_port_set_entry", "ip_protocol_entry"}
+	}
+
+	return s
+}
+
+func getIPProtocolEntrySchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "IP Protocol type service entry",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"display_name": getOptionalDisplayNameSchema(false),
+				"description":  getDescriptionSchema(),
+				"protocol": {
+					Type:         schema.TypeInt,
+					Description:  "IP protocol number",
+					Required:     true,
+					ValidateFunc: validation.IntBetween(0, 255),
+				},
+			},
+		},
+	}
+}
+
+func getAlgorithmEntrySchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Algorithm type service entry",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"display_name": getOptionalDisplayNameSchema(false),
+				"description":  getDescriptionSchema(),
+				"destination_port": {
+					Type:         schema.TypeString,
+					Description:  "A single destination port",
+					Required:     true,
+					ValidateFunc: validateSinglePort(),
+				},
+				"source_ports": {
+					Type:        schema.TypeSet,
+					Description: "Set of source ports or ranges",
+					Elem: &schema.Schema{
+						Type:         schema.TypeString,
+						ValidateFunc: validatePortRange(),
+					},
+					Optional: true,
+				},
+				"algorithm": {
+					Type:         schema.TypeString,
+					Description:  "Algorithm",
+					Required:     true,
+					ValidateFunc: validation.StringInSlice(algTypeValues, false),
+				},
+			},
+		},
+	}
+}
+
+func getNestedServiceEntrySchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Nested service service entry",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"display_name":        getOptionalDisplayNameSchema(false),
+				"description":         getDescriptionSchema(),
+				"nested_service_path": getPolicyPathSchema(true, false, "Nested Service Path"),
+			},
+		},
+	}
+}
+
 func resourceNsxtPolicyService() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyServiceCreate,
@@ -38,176 +217,50 @@ func resourceNsxtPolicyService() *schema.Resource {
 			"tag":          getTagsSchema(),
 			"context":      getContextSchema(false, false, false),
 
-			"icmp_entry": {
-				Type:        schema.TypeSet,
-				Description: "ICMP type service entry",
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"display_name": getOptionalDisplayNameSchema(false),
-						"description":  getDescriptionSchema(),
-						"protocol": {
-							Type:         schema.TypeString,
-							Description:  "Version of ICMP protocol (ICMPv4/ICMPv6)",
-							Required:     true,
-							ValidateFunc: validation.StringInSlice(icmpProtocolValues, false),
-						},
-						"icmp_type": {
-							// NOTE: icmp_type is required if icmp_code is set
-							Type:         schema.TypeString,
-							Description:  "ICMP message type",
-							Optional:     true,
-							ValidateFunc: validateStringIntBetween(0, 255),
-						},
-						"icmp_code": {
-							Type:         schema.TypeString,
-							Description:  "ICMP message code",
-							Optional:     true,
-							ValidateFunc: validateStringIntBetween(0, 255),
-						},
-					},
-				},
-			},
-
-			"l4_port_set_entry": {
-				Type:        schema.TypeSet,
-				Description: "L4 port set type service entry",
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"display_name": getOptionalDisplayNameSchema(false),
-						"description":  getDescriptionSchema(),
-						"destination_ports": {
-							Type:        schema.TypeSet,
-							Description: "Set of destination ports",
-							Elem: &schema.Schema{
-								Type:         schema.TypeString,
-								ValidateFunc: validatePortRange(),
-							},
-							Optional: true,
-						},
-						"source_ports": {
-							Type:        schema.TypeSet,
-							Description: "Set of source ports",
-							Elem: &schema.Schema{
-								Type:         schema.TypeString,
-								ValidateFunc: validatePortRange(),
-							},
-							Optional: true,
-						},
-						"protocol": {
-							Type:         schema.TypeString,
-							Description:  "L4 Protocol",
-							Required:     true,
-							ValidateFunc: validation.StringInSlice(protocolValues, false),
-						},
-					},
-				},
-			},
-
-			"igmp_entry": {
-				Type:        schema.TypeSet,
-				Description: "IGMP type service entry",
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"display_name": getOptionalDisplayNameSchema(false),
-						"description":  getDescriptionSchema(),
-					},
-				},
-			},
-
-			"ether_type_entry": {
-				Type:          schema.TypeSet,
-				Description:   "Ether type service entry",
-				Optional:      true,
-				ConflictsWith: []string{"algorithm_entry", "igmp_entry", "icmp_entry", "l4_port_set_entry", "ip_protocol_entry"},
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"display_name": getOptionalDisplayNameSchema(false),
-						"description":  getDescriptionSchema(),
-						"ether_type": {
-							Type:        schema.TypeInt,
-							Description: "Type of the encapsulated protocol",
-							Required:    true,
-						},
-					},
-				},
-			},
-
-			"ip_protocol_entry": {
-				Type:        schema.TypeSet,
-				Description: "IP Protocol type service entry",
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"display_name": getOptionalDisplayNameSchema(false),
-						"description":  getDescriptionSchema(),
-						"protocol": {
-							Type:         schema.TypeInt,
-							Description:  "IP protocol number",
-							Required:     true,
-							ValidateFunc: validation.IntBetween(0, 255),
-						},
-					},
-				},
-			},
-
-			"algorithm_entry": {
-				Type:        schema.TypeSet,
-				Description: "Algorithm type service entry",
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"display_name": getOptionalDisplayNameSchema(false),
-						"description":  getDescriptionSchema(),
-						"destination_port": {
-							Type:         schema.TypeString,
-							Description:  "A single destination port",
-							Required:     true,
-							ValidateFunc: validateSinglePort(),
-						},
-						"source_ports": {
-							Type:        schema.TypeSet,
-							Description: "Set of source ports or ranges",
-							Elem: &schema.Schema{
-								Type:         schema.TypeString,
-								ValidateFunc: validatePortRange(),
-							},
-							Optional: true,
-						},
-						"algorithm": {
-							Type:         schema.TypeString,
-							Description:  "Algorithm",
-							Required:     true,
-							ValidateFunc: validation.StringInSlice(algTypeValues, false),
-						},
-					},
-				},
-			},
-
-			"nested_service_entry": {
-				Type:        schema.TypeSet,
-				Description: "Nested service service entry",
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"display_name":        getOptionalDisplayNameSchema(false),
-						"description":         getDescriptionSchema(),
-						"nested_service_path": getPolicyPathSchema(true, false, "Nested Service Path"),
-					},
-				},
-			},
+			"icmp_entry":           getIcmpEntrySchema(),
+			"l4_port_set_entry":    getL4PortSetEntrySchema(),
+			"igmp_entry":           getIgmpEntrySchema(),
+			"ether_type_entry":     getEtherEntrySchema(true),
+			"ip_protocol_entry":    getIPProtocolEntrySchema(),
+			"algorithm_entry":      getAlgorithmEntrySchema(),
+			"nested_service_entry": getNestedServiceEntrySchema(),
 		},
 	}
 }
 
-func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*data.StructValue, error) {
+func getServiceEntryListFromSchemaOrMap(d interface{}, attrName string) []interface{} {
+	// non-nested attribute
+	if resourceData, ok := d.(*schema.ResourceData); ok {
+		return resourceData.Get(attrName).(*schema.Set).List()
+	}
+
+	// nested attribute
+	nestedMap := d.(map[string]interface{})
+	if v, ok := nestedMap[attrName]; ok {
+		return v.(*schema.Set).List()
+	}
+
+	return nil
+}
+
+func setServiceEntryListInSchemaOrMap(d interface{}, attrName string, entries []map[string]interface{}) {
+	// non-nested attribute
+	if resourceData, ok := d.(*schema.ResourceData); ok {
+		resourceData.Set(attrName, entries)
+		return
+	}
+
+	// nested attribute
+	nestedMap := d.(map[string]interface{})
+	nestedMap[attrName] = entries
+}
+
+func getServiceEntriesFromSchema(d interface{}) ([]*data.StructValue, error) {
 	converter := bindings.NewTypeConverter()
 	serviceEntries := []*data.StructValue{}
 
 	// ICMP Type service entries
-	icmpEntries := d.Get("icmp_entry").(*schema.Set).List()
+	icmpEntries := getServiceEntryListFromSchemaOrMap(d, "icmp_entry")
 	for _, icmpEntry := range icmpEntries {
 		entryData := icmpEntry.(map[string]interface{})
 		// Type and code can be unset
@@ -254,7 +307,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 	}
 
 	// L4 port set Type service entries
-	l4Entries := d.Get("l4_port_set_entry").(*schema.Set).List()
+	l4Entries := getServiceEntryListFromSchemaOrMap(d, "l4_port_set_entry")
 	for _, l4Entry := range l4Entries {
 		entryData := l4Entry.(map[string]interface{})
 		l4Protocol := entryData["protocol"].(string)
@@ -284,7 +337,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 	}
 
 	// IGMP Type service entries
-	igmpEntries := d.Get("igmp_entry").(*schema.Set).List()
+	igmpEntries := getServiceEntryListFromSchemaOrMap(d, "igmp_entry")
 	for _, igmpEntry := range igmpEntries {
 		entryData := igmpEntry.(map[string]interface{})
 		displayName := entryData["display_name"].(string)
@@ -308,7 +361,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 	}
 
 	// Ether Type service entries
-	etherEntries := d.Get("ether_type_entry").(*schema.Set).List()
+	etherEntries := getServiceEntryListFromSchemaOrMap(d, "ether_type_entry")
 	for _, etherEntry := range etherEntries {
 		entryData := etherEntry.(map[string]interface{})
 		displayName := entryData["display_name"].(string)
@@ -334,7 +387,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 	}
 
 	// IP Protocol Type service entries
-	ipProtEntries := d.Get("ip_protocol_entry").(*schema.Set).List()
+	ipProtEntries := getServiceEntryListFromSchemaOrMap(d, "ip_protocol_entry")
 	for _, ipProtEntry := range ipProtEntries {
 		entryData := ipProtEntry.(map[string]interface{})
 		displayName := entryData["display_name"].(string)
@@ -360,7 +413,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 	}
 
 	// Algorithm Type service entries
-	algEntries := d.Get("algorithm_entry").(*schema.Set).List()
+	algEntries := getServiceEntryListFromSchemaOrMap(d, "algorithm_entry")
 	for _, algEntry := range algEntries {
 		entryData := algEntry.(map[string]interface{})
 		displayName := entryData["display_name"].(string)
@@ -391,7 +444,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 	}
 
 	// Nested Service service entries
-	nestedEntries := d.Get("nested_service_entry").(*schema.Set).List()
+	nestedEntries := getServiceEntryListFromSchemaOrMap(d, "nested_service_entry")
 	for _, nestedEntry := range nestedEntries {
 		entryData := nestedEntry.(map[string]interface{})
 		displayName := entryData["display_name"].(string)
@@ -439,11 +492,14 @@ func resourceNsxtPolicyServiceExists(sessionContext utl.SessionContext, id strin
 	return false, logAPIError("Error retrieving service", err)
 }
 
-func filterServiceEntryDisplayName(entryDisplayName string, entryID string) string {
-	if entryDisplayName == entryID {
+func filterServiceEntryDisplayName(entryDisplayName *string, entryID *string) string {
+	if entryDisplayName == nil {
 		return ""
 	}
-	return entryDisplayName
+	if entryID != nil && *entryDisplayName == *entryID {
+		return ""
+	}
+	return *entryDisplayName
 }
 
 func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) error {
@@ -458,7 +514,7 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
-	serviceEntries, errc := resourceNsxtPolicyServiceGetEntriesFromSchema(d)
+	serviceEntries, errc := getServiceEntriesFromSchema(d)
 	if errc != nil {
 		return fmt.Errorf("Error during Service entries conversion: %v", errc)
 	}
@@ -510,7 +566,15 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("nsx_id", id)
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
+	err = setServiceEntriesInSchema(d, obj.ServiceEntries, true)
+	if err != nil {
+		return handleReadError(d, "Service", id, err)
+	}
 
+	return nil
+}
+
+func setServiceEntriesInSchema(d interface{}, serviceEntries []*data.StructValue, nestedSupported bool) error {
 	// Translate the returned service entries
 	converter := bindings.NewTypeConverter()
 	var icmpEntriesList []map[string]interface{}
@@ -521,7 +585,7 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 	var algEntriesList []map[string]interface{}
 	var nestedServiceEntriesList []map[string]interface{}
 
-	for _, entry := range obj.ServiceEntries {
+	for _, entry := range serviceEntries {
 		elem := make(map[string]interface{})
 		base, errs := converter.ConvertToGolang(entry, model.ServiceEntryBindingType())
 		resourceType := base.(model.ServiceEntry).ResourceType
@@ -536,7 +600,7 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 			}
 
 			serviceEntry := icmpEntry.(model.ICMPTypeServiceEntry)
-			elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
+			elem["display_name"] = filterServiceEntryDisplayName(serviceEntry.DisplayName, serviceEntry.Id)
 			elem["description"] = serviceEntry.Description
 			if serviceEntry.IcmpType != nil {
 				elem["icmp_type"] = strconv.Itoa(int(*serviceEntry.IcmpType))
@@ -557,7 +621,7 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 			}
 
 			serviceEntry := l4Entry.(model.L4PortSetServiceEntry)
-			elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
+			elem["display_name"] = filterServiceEntryDisplayName(serviceEntry.DisplayName, serviceEntry.Id)
 			elem["description"] = serviceEntry.Description
 			elem["destination_ports"] = serviceEntry.DestinationPorts
 			elem["source_ports"] = serviceEntry.SourcePorts
@@ -570,7 +634,7 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 			}
 
 			serviceEntry := etherEntry.(model.EtherTypeServiceEntry)
-			elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
+			elem["display_name"] = filterServiceEntryDisplayName(serviceEntry.DisplayName, serviceEntry.Id)
 			elem["description"] = serviceEntry.Description
 			elem["ether_type"] = serviceEntry.EtherType
 			etherEntriesList = append(etherEntriesList, elem)
@@ -581,7 +645,7 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 			}
 
 			serviceEntry := ipProtEntry.(model.IPProtocolServiceEntry)
-			elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
+			elem["display_name"] = filterServiceEntryDisplayName(serviceEntry.DisplayName, serviceEntry.Id)
 			elem["description"] = serviceEntry.Description
 			elem["protocol"] = serviceEntry.ProtocolNumber
 			ipProtEntriesList = append(ipProtEntriesList, elem)
@@ -592,7 +656,7 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 			}
 
 			serviceEntry := algEntry.(model.ALGTypeServiceEntry)
-			elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
+			elem["display_name"] = filterServiceEntryDisplayName(serviceEntry.DisplayName, serviceEntry.Id)
 			elem["description"] = serviceEntry.Description
 			elem["algorithm"] = serviceEntry.Alg
 			elem["destination_port"] = serviceEntry.DestinationPorts[0]
@@ -605,7 +669,7 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 			}
 
 			serviceEntry := igmpEntry.(model.IGMPTypeServiceEntry)
-			elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
+			elem["display_name"] = filterServiceEntryDisplayName(serviceEntry.DisplayName, serviceEntry.Id)
 			elem["description"] = serviceEntry.Description
 			igmpEntriesList = append(igmpEntriesList, elem)
 		} else if resourceType == model.ServiceEntry_RESOURCE_TYPE_NESTEDSERVICESERVICEENTRY {
@@ -615,7 +679,7 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 			}
 
 			serviceEntry := nestedEntry.(model.NestedServiceServiceEntry)
-			elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
+			elem["display_name"] = filterServiceEntryDisplayName(serviceEntry.DisplayName, serviceEntry.Id)
 			elem["description"] = serviceEntry.Description
 			elem["nested_service_path"] = serviceEntry.NestedServicePath
 			nestedServiceEntriesList = append(nestedServiceEntriesList, elem)
@@ -625,39 +689,14 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 		}
 	}
 
-	err = d.Set("icmp_entry", icmpEntriesList)
-	if err != nil {
-		return err
-	}
-
-	err = d.Set("l4_port_set_entry", l4EntriesList)
-	if err != nil {
-		return err
-	}
-
-	err = d.Set("igmp_entry", igmpEntriesList)
-	if err != nil {
-		return err
-	}
-
-	err = d.Set("ether_type_entry", etherEntriesList)
-	if err != nil {
-		return err
-	}
-
-	err = d.Set("ip_protocol_entry", ipProtEntriesList)
-	if err != nil {
-		return err
-	}
-
-	err = d.Set("algorithm_entry", algEntriesList)
-	if err != nil {
-		return err
-	}
-
-	err = d.Set("nested_service_entry", nestedServiceEntriesList)
-	if err != nil {
-		return err
+	setServiceEntryListInSchemaOrMap(d, "icmp_entry", icmpEntriesList)
+	setServiceEntryListInSchemaOrMap(d, "l4_port_set_entry", l4EntriesList)
+	setServiceEntryListInSchemaOrMap(d, "igmp_entry", igmpEntriesList)
+	setServiceEntryListInSchemaOrMap(d, "ether_type_entry", etherEntriesList)
+	setServiceEntryListInSchemaOrMap(d, "ip_protocol_entry", ipProtEntriesList)
+	setServiceEntryListInSchemaOrMap(d, "algorithm_entry", algEntriesList)
+	if nestedSupported {
+		setServiceEntryListInSchemaOrMap(d, "nested_service_entry", nestedServiceEntriesList)
 	}
 
 	return nil
@@ -676,7 +715,7 @@ func resourceNsxtPolicyServiceUpdate(d *schema.ResourceData, m interface{}) erro
 	description := d.Get("description").(string)
 	revision := int64(d.Get("revision").(int))
 	tags := getPolicyTagsFromSchema(d)
-	serviceEntries, errc := resourceNsxtPolicyServiceGetEntriesFromSchema(d)
+	serviceEntries, errc := getServiceEntriesFromSchema(d)
 	if errc != nil {
 		return fmt.Errorf("Error during Service entries conversion: %v", errc)
 	}

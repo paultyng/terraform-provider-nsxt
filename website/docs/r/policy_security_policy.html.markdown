@@ -124,10 +124,15 @@ resource "nsxt_policy_security_policy" "policy1" {
     sources_excluded = true
     scope            = [nsxt_policy_group.aquarium.path]
     action           = "ALLOW"
-    services         = [nsxt_policy_service.udp.path]
-    logged           = true
-    disabled         = true
-    notes            = "Disabled by starfish for debugging"
+    service_entries {
+      l4_port_set_entry {
+        protocol          = "UDP"
+        destination_ports = ["9080"]
+      }
+    }
+    logged   = true
+    disabled = true
+    notes    = "Disabled by starfish for debugging"
   }
 
   lifecycle {
@@ -172,6 +177,30 @@ The following arguments are supported:
   * `profiles` - (Optional) Set of profile paths relevant for this rule.
   * `scope` - (Optional) Set of policy object paths where the rule is applied.
   * `services` - (Optional) Set of service paths to match.
+  * `service_entries` - (Optional) Set of explicit protocol/port service definition
+    * `icmp_entry` - (Optional) Set of ICMP type service entries
+      * `display_name` - (Optional) Display name of the service entry
+      * `protocol` - (Required) Version of ICMP protocol: `ICMPv4` or `ICMPv6`
+      * `icmp_code` - (Optional) ICMP message code
+      * `icmp_type` - (Optional) ICMP message type
+    * `l4_port_set_entry` - (Optional) Set of L4 ports set service entries
+      * `display_name` - (Optional) Display name of the service entry
+      * `protocol` - (Required) L4 protocol: `TCP` or `UDP`
+      * `destination_ports` - (Optional) Set of destination ports
+      * `source_ports` - (Optional) Set of source ports
+    * `igmp_entry` - (Optional) Set of IGMP type service entries
+      * `display_name` - (Optional) Display name of the service entry
+    * `ether_type_entry` - (Optional) Set of Ether type service entries
+      * `display_name` - (Optional) Display name of the service entry
+      * `ether_type` - (Required) Type of the encapsulated protocol
+    * `ip_protocol_entry` - (Optional) Set of IP Protocol type service entries
+      * `display_name` - (Optional) Display name of the service entry
+      * `protocol` - (Required) IP protocol number
+    * `algorithm_entry` - (Optional) Set of Algorithm type service entries
+      * `display_name` - (Optional) Display name of the service entry
+      * `destination_port` - (Required) a single destination port
+      * `source_ports` - (Optional) Set of source ports/ranges
+      * `algorithm` - (Required) Algorithm: one of `ORACLE_TNS`, `FTP`, `SUN_RPC_TCP`, `SUN_RPC_UDP`, `MS_RPC_TCP`, `MS_RPC_UDP`, `NBNS_BROADCAST`(Deprecated), `NBDG_BROADCAST`(Deprecated), `TFTP`
   * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
   * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
   * `sequence_number` - (Optional) It is recommended not to specify sequence number for rules, and rely on provider to auto-assign them. If you choose to specify sequence numbers, you must make sure the numbers are consistent with order of the rules in configuration. Please note that sequence numbers should start with 1 and not 0. To avoid confusion, either specify sequence numbers in all rules, or none at all.

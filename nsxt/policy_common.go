@@ -271,6 +271,15 @@ func getSecurityPolicyAndGatewayRuleSchema(scopeRequired bool, isIds bool, nsxID
 			},
 			Optional: true,
 		},
+		"service_entries": {
+			Type:        schema.TypeList,
+			Description: "List of services to match",
+			Elem: &schema.Resource{
+				Schema: getPolicyServiceEntrySchema(),
+			},
+			Optional: true,
+			MaxItems: 1,
+		},
 		"source_groups": {
 			Type:        schema.TypeSet,
 			Description: "List of source groups",
@@ -328,6 +337,17 @@ func getPolicyGatewayPolicySchema(isVPC bool) map[string]*schema.Schema {
 	// GW Policy rules require scope to be set
 	secPolicy["rule"] = getSecurityPolicyAndGatewayRulesSchema(!isVPC, false, true)
 	return secPolicy
+}
+
+func getPolicyServiceEntrySchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"icmp_entry":        getIcmpEntrySchema(),
+		"l4_port_set_entry": getL4PortSetEntrySchema(),
+		"igmp_entry":        getIgmpEntrySchema(),
+		"ether_type_entry":  getEtherEntrySchema(false),
+		"ip_protocol_entry": getIPProtocolEntrySchema(),
+		"algorithm_entry":   getAlgorithmEntrySchema(),
+	}
 }
 
 func getPolicySecurityPolicySchema(isIds, withContext, withRule, isVPC bool) map[string]*schema.Schema {
@@ -485,6 +505,14 @@ func setPolicyRulesInSchema(d *schema.ResourceData, rules []model.Rule) error {
 		}
 		elem["tag"] = tagList
 
+		if len(rule.ServiceEntries) > 0 {
+			var entryList []map[string]interface{}
+			entry := make(map[string]interface{})
+			setServiceEntriesInSchema(entry, rule.ServiceEntries, false)
+			entryList = append(entryList, entry)
+			elem["service_entries"] = entryList
+		}
+
 		rulesList = append(rulesList, elem)
 	}
 
@@ -577,6 +605,13 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 			Scope:                getPathListFromMap(data, "scope"),
 			Profiles:             getPathListFromMap(data, "profiles"),
 			SequenceNumber:       &sequenceNumber,
+		}
+
+		schemaServiceEntries := data["service_entries"].([]interface{})
+		if len(schemaServiceEntries) > 0 {
+			schemaServiceEntry := schemaServiceEntries[0].(map[string]interface{})
+			serviceEntries, _ := getServiceEntriesFromSchema(schemaServiceEntry)
+			elem.ServiceEntries = serviceEntries
 		}
 
 		ruleList = append(ruleList, elem)

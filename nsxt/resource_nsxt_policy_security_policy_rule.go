@@ -100,7 +100,7 @@ func securityPolicyRuleSchemaToModel(d *schema.ResourceData, id string) model.Ru
 	tagStructs := getPolicyTagsFromSet(d.Get("tag").(*schema.Set))
 
 	resourceType := "Rule"
-	return model.Rule{
+	rule := model.Rule{
 		ResourceType:         &resourceType,
 		Id:                   &id,
 		DisplayName:          &displayName,
@@ -122,6 +122,14 @@ func securityPolicyRuleSchemaToModel(d *schema.ResourceData, id string) model.Ru
 		Profiles:             getPathListFromSchema(d, "profiles"),
 		SequenceNumber:       &sequenceNumber,
 	}
+
+	schemaServiceEntries := d.Get("service_entries").([]interface{})
+	if len(schemaServiceEntries) > 0 {
+		schemaServiceEntry := schemaServiceEntries[0].(map[string]interface{})
+		serviceEntries, _ := getServiceEntriesFromSchema(schemaServiceEntry)
+		rule.ServiceEntries = serviceEntries
+	}
+	return rule
 }
 
 func resourceNsxtPolicySecurityPolicyRuleExistsPartial(d *schema.ResourceData, m interface{}, policyPath string) func(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
@@ -209,6 +217,14 @@ func securityPolicyRuleModelToSchema(d *schema.ResourceData, rule model.Rule) {
 	d.Set("sequence_number", rule.SequenceNumber)
 	d.Set("nsx_id", rule.Id)
 	d.Set("rule_id", rule.RuleId)
+
+	var entryList []map[string]interface{}
+	if len(rule.ServiceEntries) > 0 {
+		entry := make(map[string]interface{})
+		setServiceEntriesInSchema(entry, rule.ServiceEntries, false)
+		entryList = append(entryList, entry)
+	}
+	d.Set("service_entries", entryList)
 
 	setPolicyTagsInSchema(d, rule.Tags)
 }
