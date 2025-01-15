@@ -1,41 +1,53 @@
-issues:
-  max-per-linter: 0
-  max-same-issues: 0
-  exclude:
-     - SA4004
-     - SA1019
-     - G402
-     - G404
-     - G115
-     - GetOkExists
+# © Broadcom. All Rights Reserved.
+# The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+# SPDX-License-Identifier: MPL-2.0
 
-run:
-  deadline: 30m
+# For more information about the golangci-lint configuration file, refer to:
+# https://golangci-lint.run/usage/configuration/
+
+issues:
+  exclude-rules:
+    # Exclude specific staticcheck rules to suppress false positives or acceptable issues.
+    - linters: [staticcheck]
+      text: "SA4004|SA1019|GetOkExists"
+    # Exclude specific gosec rules to suppress warnings about issues deemed acceptable.
+    - linters: [gosec]
+      text: "G402|G404|G115"
 
 linters:
-  disable-all: true
+  disable-all: true # Disable all linters by default and enable only the ones required.
   enable:
-    - misspell
-    - gofmt
-    - unused
-    - staticcheck
-    - gosec
-    - goimports
-    - govet
-    - misspell
-    - gosimple
-    - staticcheck
-    - ineffassign
-    - unused
+    - gofmt             # Checks Go code formatting.
+    - goimports         # Ensures proper import formatting.
+    - gosimple          # Reports simplifications in code.
+    - govet             # Examines code for possible mistakes.
+    - gosec             # Checks for security issues in code.
+    - ineffassign       # Detects inefficient assignments.
+    - misspell          # Finds and fixes typos.
+    - staticcheck       # Reports bugs, code smells, and deprecated practices.
+    - unused            # Detects unused variables, constants, etc.
+
+run:
+  deadline: 30m # Sets the maximum time limit for the linter run.
+
+output:
+  formats:
+    - format: colored-line-number # Allows colored output with line numbers when errors are reported.
 
 linters-settings:
   errcheck:
-    ignore: github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema:ForceNew|Set,fmt:.*,io:Close
+    # Exclude specific functions from errcheck warnings, as errors are intentionally ignored in these cases.
+    exclude-functions:
+      - "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema:ForceNew|Set"
+      - "fmt:.*"
+      - "io:Close"
+
   revive:
+    # Enable specific rules for the revive linter for improved code quality and readability.
     rules:
-      - name: unreachable-code
-      - name: errorf
-      - name: range
-      - name: superfluous-else
-      - name: var-declaration
-      - name: duplicated-imports
+      - name: unreachable-code      # Detect code that will never be executed.
+      - name: errorf                # Avoid string formatting in error messages.
+      - name: range                 # Improve range loop usage.
+      - name: superfluous-else      # Eliminate unnecessary else statements.
+      - name: var-declaration       # Simplify variable declaration.
+      - name: duplicated-imports    # Detect and remove duplicate imports.-imports

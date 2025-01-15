@@ -66,7 +66,6 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Type:        schema.TypeBool,
 				Description: "Flag to specify whether the DVPGs created for project segments are grouped under a folder on the VC",
 				Optional:    true,
-				Default:     true,
 			},
 			"external_ipv4_blocks": {
 				Type:     schema.TypeList,
@@ -184,7 +183,7 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 		return err
 	}
 
-	if d.HasChanges("default_security_profile") {
+	if d.HasChanges("default_security_profile") && util.NsxVersionHigherOrEqual("9.0.0") {
 		err = patchVpcSecurityProfile(d, connector, id)
 	}
 	return err
@@ -291,7 +290,9 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("site_info", siteInfosList)
 	d.Set("tier0_gateway_paths", obj.Tier0s)
 
-	err = setVpcSecurityProfileInSchema(d, connector, id)
+	if util.NsxVersionHigherOrEqual("9.0.0") {
+		err = setVpcSecurityProfileInSchema(d, connector, id)
+	}
 	if err != nil {
 		return err
 	}

@@ -63,14 +63,17 @@ const doubleTags string = `
     tag   = "tag2"
   }`
 
-var randomized = false
-var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz")
+var (
+	randomized  bool
+	letterRunes = []rune("abcdefghijklmnopqrstuvwxyz")
+	rnd         *rand.Rand
+)
 
 func initRand() {
 	if randomized {
 		return
 	}
-	rand.Seed(time.Now().UnixNano())
+	rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
 	randomized = true
 }
 
