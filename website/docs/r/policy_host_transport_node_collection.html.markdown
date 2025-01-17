@@ -18,14 +18,14 @@ data "vsphere_compute_cluster" "compute_cluster" {
   datacenter_id = data.vsphere_datacenter.datacenter.id
 }
 
+data "nsxt_compute_collection" "compute_cluster_collection" {
+  display_name = data.vsphere_compute_cluster.compute_cluster.name
+}
+
 resource "nsxt_policy_host_transport_node_collection" "htnc1" {
   display_name                = "HostTransportNodeCollection1"
-  compute_collection_id       = data.vsphere_compute_cluster.compute_cluster.id
+  compute_collection_id       = data.nsxt_compute_collection.compute_cluster_collection.id
   transport_node_profile_path = nsxt_policy_host_transport_node_profile.tnp.path
-  tag {
-    scope = "color"
-    tag   = "red"
-  }
 }
 ```
 
