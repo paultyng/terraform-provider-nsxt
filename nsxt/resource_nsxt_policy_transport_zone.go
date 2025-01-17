@@ -18,6 +18,8 @@ import (
 
 var defaultInfraSitePath = "/infra/sites/default"
 
+var transportZonePathSample = "/infra/sites/[site]/enforcement-points/[enforcement-point]/transport-zones/[transport-zone]"
+
 func resourceNsxtPolicyTransportZone() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyTransportZoneCreate,
@@ -25,7 +27,7 @@ func resourceNsxtPolicyTransportZone() *schema.Resource {
 		Update: resourceNsxtPolicyTransportZoneUpdate,
 		Delete: resourceNsxtPolicyTransportZoneDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceNsxtPolicyTransportZoneImporter,
+			State: getPolicyPathOrIDResourceImporter(transportZonePathSample),
 		},
 
 		Schema: map[string]*schema.Schema{

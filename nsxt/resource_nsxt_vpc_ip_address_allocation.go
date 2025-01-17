@@ -99,6 +99,8 @@ var vpcIpAddressAllocationSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
+var vpcIpAddressAllocationPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/ip-address-allocations/[allocation]"
+
 func resourceNsxtVpcIpAddressAllocation() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVpcIpAddressAllocationCreate,
@@ -106,7 +108,7 @@ func resourceNsxtVpcIpAddressAllocation() *schema.Resource {
 		Update: resourceNsxtVpcIpAddressAllocationUpdate,
 		Delete: resourceNsxtVpcIpAddressAllocationDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVPCPathResourceImporter,
+			State: getVpcPathResourceImporter(vpcIpAddressAllocationPathExample),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcIpAddressAllocationSchema),
 	}

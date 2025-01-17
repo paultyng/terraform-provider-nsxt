@@ -15,6 +15,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var ipPoolPathExample = getMultitenancyPathExample("/infra/ip-pools/[ip-pool]")
+
 func resourceNsxtPolicyIPPool() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyIPPoolCreate,
@@ -22,7 +24,7 @@ func resourceNsxtPolicyIPPool() *schema.Resource {
 		Update: resourceNsxtPolicyIPPoolUpdate,
 		Delete: resourceNsxtPolicyIPPoolDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(ipPoolPathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

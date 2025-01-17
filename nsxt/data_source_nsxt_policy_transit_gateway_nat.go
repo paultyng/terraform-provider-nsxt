@@ -39,11 +39,13 @@ func dataSourceNsxtPolicyTransitGatewayNat() *schema.Resource {
 	}
 }
 
+var transitGatewayPathExample = "/orgs/[org]/projects/[project]/transit-gateways/[gateway]"
+
 func dataSourceNsxtPolicyTransitGatewayNatRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
 	parentPath := d.Get("transit_gateway_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, transitGatewayPathExample)
 	if pathErr != nil {
 		return fmt.Errorf("invalid transit_gateway_path: %v", pathErr)
 	}

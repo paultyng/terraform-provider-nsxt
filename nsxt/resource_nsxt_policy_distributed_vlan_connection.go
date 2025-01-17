@@ -54,6 +54,8 @@ var distributedVlanConnectionSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
+const distributedVlanConnectionPathExample = "/infra/distributed-vlan-connections/[connection]"
+
 func resourceNsxtPolicyDistributedVlanConnection() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyDistributedVlanConnectionCreate,
@@ -61,7 +63,7 @@ func resourceNsxtPolicyDistributedVlanConnection() *schema.Resource {
 		Update: resourceNsxtPolicyDistributedVlanConnectionUpdate,
 		Delete: resourceNsxtPolicyDistributedVlanConnectionDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathOnlyResourceImporter,
+			State: getPolicyPathResourceImporter(distributedVlanConnectionPathExample),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(distributedVlanConnectionSchema),
 	}

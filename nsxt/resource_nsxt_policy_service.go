@@ -19,6 +19,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var servicePathExample = getMultitenancyPathExample("/infra/services/[service]")
+
 func resourceNsxtPolicyService() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyServiceCreate,
@@ -26,7 +28,7 @@ func resourceNsxtPolicyService() *schema.Resource {
 		Update: resourceNsxtPolicyServiceUpdate,
 		Delete: resourceNsxtPolicyServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(servicePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

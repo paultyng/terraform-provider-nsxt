@@ -237,6 +237,8 @@ var segmentSecurityProfileSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
+var segmentSecurityProfilePathExample = getMultitenancyPathExample("/infra/segment-security-profiles/[profile]")
+
 func resourceNsxtPolicySegmentSecurityProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicySegmentSecurityProfileCreate,
@@ -244,7 +246,7 @@ func resourceNsxtPolicySegmentSecurityProfile() *schema.Resource {
 		Update: resourceNsxtPolicySegmentSecurityProfileUpdate,
 		Delete: resourceNsxtPolicySegmentSecurityProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(segmentSecurityProfilePathExample),
 		},
 
 		Schema: metadata.GetSchemaFromExtendedSchema(segmentSecurityProfileSchema),

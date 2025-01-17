@@ -15,6 +15,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
+var gatewayFloodProtectionProfilePathExample = getMultitenancyPathExample("/infra/flood-protection-profiles/[profile]")
+
 func resourceNsxtPolicyGatewayFloodProtectionProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyGatewayFloodProtectionProfileCreate,
@@ -22,7 +24,7 @@ func resourceNsxtPolicyGatewayFloodProtectionProfile() *schema.Resource {
 		Update: resourceNsxtPolicyGatewayFloodProtectionProfileUpdate,
 		Delete: resourceNsxtPolicyFloodProtectionProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(gatewayFloodProtectionProfilePathExample),
 		},
 		Schema: getGatewayFloodProtectionProfile(),
 	}

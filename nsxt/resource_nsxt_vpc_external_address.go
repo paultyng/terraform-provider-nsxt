@@ -9,6 +9,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs/subnets"
 )
 
+var vpcSubnetPortPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/subnets/[subnet]/ports/[port]"
+
 func resourceNsxtVpcExternalAddress() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVpcExternalAddressCreate,
@@ -35,7 +37,7 @@ func updatePort(d *schema.ResourceData, m interface{}, deleteFlow bool) error {
 	addressPath := d.Get("allocated_external_ip_path").(string)
 	log.Printf("[DEBUG] Updating external address binding for port %s", portPath)
 
-	parents, pathErr := parseStandardPolicyPathVerifySize(portPath, 5)
+	parents, pathErr := parseStandardPolicyPathVerifySize(portPath, 5, vpcSubnetPortPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -73,7 +75,7 @@ func resourceNsxtVpcExternalAddressCreate(d *schema.ResourceData, m interface{})
 func resourceNsxtVpcExternalAddressRead(d *schema.ResourceData, m interface{}) error {
 	portPath := d.Get("parent_path").(string)
 
-	parents, pathErr := parseStandardPolicyPathVerifySize(portPath, 5)
+	parents, pathErr := parseStandardPolicyPathVerifySize(portPath, 5, vpcSubnetPortPathExample)
 	if pathErr != nil {
 		return pathErr
 	}

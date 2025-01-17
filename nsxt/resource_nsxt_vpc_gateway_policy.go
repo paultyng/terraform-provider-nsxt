@@ -15,6 +15,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var vpcGatewayPolicyPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/gateway-policies/[policy]"
+
 func resourceNsxtVPCGatewayPolicy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVPCGatewayPolicyCreate,
@@ -22,7 +24,7 @@ func resourceNsxtVPCGatewayPolicy() *schema.Resource {
 		Update: resourceNsxtVPCGatewayPolicyUpdate,
 		Delete: resourceNsxtVPCGatewayPolicyDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVPCPathResourceImporter,
+			State: getVpcPathResourceImporter(vpcGatewayPolicyPathExample),
 		},
 
 		Schema: getPolicyGatewayPolicySchema(true),

@@ -22,6 +22,8 @@ var visibilityTypes = []string{
 	model.IpAddressBlock_VISIBILITY_PRIVATE,
 }
 
+var ipBlockPathExample = getMultitenancyPathExample("/infra/ip-blocks/[ip-block]")
+
 func resourceNsxtPolicyIPBlock() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyIPBlockCreate,
@@ -29,7 +31,7 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 		Update: resourceNsxtPolicyIPBlockUpdate,
 		Delete: resourceNsxtPolicyIPBlockDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(ipBlockPathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

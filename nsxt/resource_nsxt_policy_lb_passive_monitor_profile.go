@@ -22,7 +22,7 @@ func resourceNsxtPolicyLBPassiveMonitorProfile() *schema.Resource {
 		Update: resourceNsxtPolicyLBPassiveMonitorProfileUpdate,
 		Delete: resourceNsxtPolicyLBPassiveMonitorProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(lbMonitorProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{
