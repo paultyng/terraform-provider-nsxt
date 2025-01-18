@@ -1,5 +1,6 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -139,14 +140,14 @@ data "nsxt_policy_edge_cluster" "test" {
 
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name = "%s"
- 
+
   locale_service {
     edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
   }
 }
 
 data "nsxt_policy_gateway_locale_service" "test" {
-  gateway_path = nsxt_policy_tier0_gateway.test.path 
+  gateway_path = nsxt_policy_tier0_gateway.test.path
   display_name = one(nsxt_policy_tier0_gateway.test.locale_service).display_name
 }`, getTestSiteName(), name)
 }

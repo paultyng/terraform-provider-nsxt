@@ -1,5 +1,6 @@
-/* Copyright © 2022 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -628,7 +629,7 @@ resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
 	service_path  = nsxt_policy_ipsec_vpn_service.test_ipsec_svc.path
 	display_name  = "%s"
 	local_address = "20.20.0.25"
-	}	
+	}
 	`, ipsecVpnResourceName)
 	}
 	var vpnServiceTemplate string

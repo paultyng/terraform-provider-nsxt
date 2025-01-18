@@ -1,5 +1,6 @@
-//* Copyright © 2024 VMware, Inc. All Rights Reserved.
-//   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 // This test file tests both distributed_flood_protection_profile and distributed_flood_protection_profile_binding
 package nsxt
@@ -197,7 +198,7 @@ resource "nsxt_policy_distributed_flood_protection_profile_binding" "%s" {
 %s
  display_name = "%s"
  description  = "%s"
- profile_path    = nsxt_policy_distributed_flood_protection_profile.%s.path 
+ profile_path    = nsxt_policy_distributed_flood_protection_profile.%s.path
  group_path      = nsxt_policy_group.test.path
  sequence_number = %s
 

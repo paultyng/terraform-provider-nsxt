@@ -1,5 +1,6 @@
-/* Copyright © 2023 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -252,7 +253,7 @@ func testAccNsxtPolicyGatewayFloodProtectionProfileMinimalistic(withContext bool
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_gateway_flood_protection_profile" "test" {
-%s  
+%s
   display_name = "%s"
 
 }`, context, name)
