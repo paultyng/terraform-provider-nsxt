@@ -501,6 +501,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_withIPCidrRange(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.5.source_groups.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.5.source_groups.0", policyRange),
 					resource.TestCheckResourceAttr(testResourceName, "rule.5.destination_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.service_entries.#", "1"),
 				),
 			},
 			{
@@ -560,6 +561,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_withIPCidrRange(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.5.source_groups.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.5.source_groups.0", updatedPolicyRange),
 					resource.TestCheckResourceAttr(testResourceName, "rule.5.destination_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.service_entries.#", "1"),
 				),
 			},
 		},
@@ -952,48 +954,58 @@ func testAccNsxtPolicyGatewayPolicyWithIPCidrRange(name string, destIP string, d
 		}
 
 		rule {
-			display_name          = "rule2"
-			source_groups         = [nsxt_policy_group.group1.path]			
-			destination_groups    = ["%s"]
-			services              = [nsxt_policy_service.icmp.path]
-			scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]			
-			action                = "ALLOW"
-		  }
+		  display_name          = "rule2"
+		  source_groups         = [nsxt_policy_group.group1.path]			
+		  destination_groups    = ["%s"]
+		  services              = [nsxt_policy_service.icmp.path]
+		  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]			
+		  action                = "ALLOW"
+	        }
 
-		  rule {
-			display_name          = "rule3"
-			source_groups         = [nsxt_policy_group.group1.path]
-			destination_groups    = ["%s"]
-			services              = [nsxt_policy_service.icmp.path]
-			scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]			
-			action                = "ALLOW"
-		  }
+		rule {
+		  display_name          = "rule3"
+		  source_groups         = [nsxt_policy_group.group1.path]
+		  destination_groups    = ["%s"]
+		  services              = [nsxt_policy_service.icmp.path]
+		  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]			
+		  action                = "ALLOW"
+		}
 
-		  rule {
-			display_name          = "rule4"
-			source_groups         = ["%s"]
-			destination_groups    = [nsxt_policy_group.group2.path]
-			services              = [nsxt_policy_service.icmp.path]
-			scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]		  
-			action                = "ALLOW"
+		rule {
+		  display_name          = "rule4"
+		  source_groups         = ["%s"]
+		  destination_groups    = [nsxt_policy_group.group2.path]
+		  services              = [nsxt_policy_service.icmp.path]
+		  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]		  
+		  action                = "ALLOW"
+		}
+  
+		rule {
+		  display_name          = "rule5"
+		  source_groups         = ["%s"]			
+		  destination_groups    = [nsxt_policy_group.group2.path]
+		  services              = [nsxt_policy_service.icmp.path]
+		  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]			
+		  action                = "ALLOW"
+		}
+  
+		rule {
+		  display_name          = "rule6"
+		  source_groups         = ["%s"]
+		  destination_groups    = [nsxt_policy_group.group2.path]
+		  services              = [nsxt_policy_service.icmp.path]
+		  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]			
+	          action                = "ALLOW"
+		  service_entries {
+		    algorithm_entry {
+		      algorithm         = "TFTP"
+		      destination_port  = "9000"
+	            }
+
+		    ether_type_entry {
+		      ether_type = "1536"
+		    }
 		  }
-  
-		  rule {
-			  display_name          = "rule5"
-			  source_groups         = ["%s"]			
-			  destination_groups    = [nsxt_policy_group.group2.path]
-			  services              = [nsxt_policy_service.icmp.path]
-			  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]			
-			  action                = "ALLOW"
-			}
-  
-			rule {
-			  display_name          = "rule6"
-			  source_groups         = ["%s"]
-			  destination_groups    = [nsxt_policy_group.group2.path]
-			  services              = [nsxt_policy_service.icmp.path]
-			  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]			
-			  action                = "ALLOW"
-			}
+		}
 }`, name, destIP, destCidr, destIPRange, sourceIP, sourceCidr, sourceIPRange)
 }

@@ -1149,7 +1149,7 @@ func testAccNsxtPolicyNestedServiceMixedTemplate(serviceName string, nestedServi
   nested_service_entry {
     display_name        = "%s"
     description         = "Entry-1"
-	nested_service_path = "%s"
+    nested_service_path = "%s"
   }
 
   l4_port_set_entry {
