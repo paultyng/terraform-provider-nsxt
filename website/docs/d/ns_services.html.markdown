@@ -7,7 +7,7 @@ description: A networking and security services data source. This data source bu
 
 # nsxt_ns_services
 
-This data source builds a "name to uuid" map of the whole NS Services table. Such map can be referenced in configuration to obtain object uuids by display name at a cost of single roudtrip to NSX, which improves apply and refresh
+This data source builds a "name to uuid" map of the whole NS Services table. Such map can be referenced in configuration to obtain object uuids by display name at a cost of single roundtrip to NSX, which improves apply and refresh
 time at scale, compared to multiple instances of `nsxt_ns_service` data source.
 
 ## Example Usage

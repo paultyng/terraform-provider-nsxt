@@ -319,7 +319,7 @@ func TestAccResourceNsxtPolicyProject_900defaultSecurityProfile(t *testing.T) {
 				// Create: Set T0, Ext GW connection, Ext IPv4 Block, activate default DFW
 				Config: testAccNsxtPolicyProjectMinimalistic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyProjectGetSecurityProfileNSEnabled(testResourceName, false),
+					testAccNsxtPolicyProjectGetSecurityProfileNSEnabled(testResourceName, true),
 				),
 			},
 			{
